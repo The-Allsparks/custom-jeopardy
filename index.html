@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Jeopardy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --board-bg: #000814;
+      --cell: #060ce9;
+      --cell-edge: #3a46ff;
+      --cell-shadow: #02055a;
+      --gold: #ffcc00;
+      --gold-dim: #c9a000;
+      --played: #03061f;
+      --text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--board-bg);
+      color: var(--text);
+      font-family: Oswald, Impact, "Arial Narrow", sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-shadow: 0 2px 0 #7a5c00;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    #round-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #round-nav[hidden] {
+      display: none;
+    }
+
+    #reset,
+    #sound,
+    #overlay-sound,
+    .round-btn,
+    #go-double {
+      appearance: none;
+      border: 2px solid var(--gold);
+      background: #111;
+      color: var(--gold);
+      font: inherit;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 18px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .round-btn {
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    #reset:hover,
+    #reset:focus-visible,
+    #sound:hover,
+    #sound:focus-visible,
+    #overlay-sound:hover,
+    #overlay-sound:focus-visible,
+    .round-btn:hover:not(:disabled),
+    .round-btn:focus-visible:not(:disabled),
+    .round-btn.active,
+    #go-double:hover,
+    #go-double:focus-visible {
+      background: var(--gold);
+      color: #111;
+    }
+
+    .round-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .round-btn.just-unlocked {
+      animation: unlock-pulse 1.1s ease-in-out 3;
+    }
+
+    @keyframes unlock-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); }
+      50% { box-shadow: 0 0 0 8px rgba(255, 204, 0, 0); }
+    }
+
+    #unlock-bar {
+      display: none;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      border: 2px solid var(--gold);
+      background: #111;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    #unlock-bar.open {
+      display: flex;
+    }
+
+    #unlock-bar p {
+      margin: 0;
+    }
+
+    #board {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .category {
+      display: grid;
+      grid-template-rows: 1fr;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%),
+        var(--cell);
+      border: 3px solid var(--cell-edge);
+      box-shadow: inset 0 0 0 2px var(--cell-shadow);
+      padding: 8px;
+      user-select: none;
+      min-height: 0;
+    }
+
+    .cell.header {
+      color: #fff;
+      font-size: clamp(0.85rem, 1.8vw, 1.7rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      text-shadow: 0 2px 0 #000;
+    }
+
+    .cell.clue {
+      color: var(--gold);
+      font-size: clamp(1.6rem, 5vw, 4.2rem);
+      font-weight: 700;
+      cursor: pointer;
+      text-shadow: 0 3px 0 #7a5c00;
+    }
+
+    .cell.clue:hover:not(.played),
+    .cell.clue:focus-visible:not(.played) {
+      filter: brightness(1.15);
+    }
+
+    .cell.clue.played {
+      background: var(--played);
+      border-color: #151a40;
+      color: transparent;
+      text-shadow: none;
+      cursor: default;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 6vh 6vw;
+      background:
+        radial-gradient(circle at top, #1b24ff 0%, var(--cell) 55%, #02055a 100%);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #overlay.open {
+      display: flex;
+    }
+
+    #overlay-label {
+      font-size: clamp(1rem, 2.4vw, 1.6rem);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    #overlay-meta {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    #overlay-text {
+      max-width: 18em;
+      font-family: "Playfair Display", Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(1.8rem, 5.4vw, 4.4rem);
+      line-height: 1.2;
+      text-align: center;
+      text-wrap: balance;
+    }
+
+    #overlay.question #overlay-text {
+      color: var(--gold);
+    }
+
+    #overlay-hint {
+      position: absolute;
+      bottom: 24px;
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    #overlay-sound {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      z-index: 1;
+    }
+
+    #error {
+      display: none;
+      margin: auto;
+      max-width: 40rem;
+      padding: 24px;
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      font-family: Georgia, serif;
+      line-height: 1.5;
+    }
+
+    #error.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">Jeopardy</h1>
+    <div class="header-actions">
+      <div id="round-nav" hidden></div>
+      <button id="sound" type="button" aria-pressed="true">Music on</button>
+      <button id="reset" type="button" title="Deal new categories and clues">Reset</button>
+    </div>
+  </header>
+  <div id="unlock-bar" aria-live="polite">
+    <p id="unlock-message">All clues are revealed. Double Jeopardy is unlocked.</p>
+    <button id="go-double" type="button">Play Double Jeopardy</button>
+  </div>
+  <div id="board"></div>
+  <div id="error"></div>
+  <div id="overlay">
+    <div id="overlay-label"></div>
+    <div id="overlay-meta"></div>
+    <div id="overlay-text"></div>
+    <div id="overlay-hint">Click to continue</div>
+    <button id="overlay-sound" type="button" aria-pressed="true">Music on</button>
+  </div>
+
+  <script src="board.txt"></script>
+  <script>
+    (function () {
+      const boardEl = document.getElementById("board");
+      const titleEl = document.getElementById("title");
+      const errorEl = document.getElementById("error");
+      const overlayEl = document.getElementById("overlay");
+      const overlayLabel = document.getElementById("overlay-label");
+      const overlayMeta = document.getElementById("overlay-meta");
+      const overlayText = document.getElementById("overlay-text");
+      const resetBtn = document.getElementById("reset");
+      const soundBtn = document.getElementById("sound");
+      const overlaySoundBtn = document.getElementById("overlay-sound");
+      const roundNav = document.getElementById("round-nav");
+      const unlockBar = document.getElementById("unlock-bar");
+      const unlockMessage = document.getElementById("unlock-message");
+      const goDoubleBtn = document.getElementById("go-double");
+
+      if (typeof BOARD !== "string") {
+        showError("Could not load board.txt. Keep index.html and board.txt in the same folder, then refresh.");
+        return;
+      }
+
+      const CATEGORIES_PER_ROUND = 6;
+      const CLUES_ON_BOARD = 5;
+      const ROUND_PLAN = [
+        { name: "Jeopardy", values: ["200", "400", "600", "800", "1000"] },
+        { name: "Double Jeopardy", values: ["400", "800", "1200", "1600", "2000"] }
+      ];
+
+      const pool = parseBoard(BOARD);
+      if (!pool) {
+        return;
+      }
+
+      let game = loadOrDeal();
+      let storageKey = playedStorageKey();
+      let played = new Set(loadPlayed());
+      let active = null;
+      let roundIndex = loadRoundIndex();
+      let pendingUnlockPulse = false;
+      const thinkAudio = new Audio(encodeURI("Jeopardy - 1997 - Think Music.mp3"));
+      thinkAudio.preload = "auto";
+      let muted = loadMuted();
+
+      titleEl.textContent = game.title;
+      document.title = game.title;
+      updateSoundButtons();
+      renderAll();
+
+      resetBtn.addEventListener("click", function () {
+        if (!window.confirm("Deal a new game? Categories and clues will change, and this board's progress will be cleared.")) {
+          return;
+        }
+        startNewGame();
+      });
+
+      goDoubleBtn.addEventListener("click", function () {
+        showRound(roundIndex + 1);
+      });
+
+      soundBtn.addEventListener("click", toggleSound);
+      overlaySoundBtn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleSound();
+      });
+
+      overlayEl.addEventListener("click", advanceOverlay);
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "m" || event.key === "M") {
+          if (event.repeat) {
+            return;
+          }
+          event.preventDefault();
+          toggleSound();
+          return;
+        }
+        if (!overlayEl.classList.contains("open")) {
+          return;
+        }
+        if ((event.key === "Enter" || event.key === " ") &&
+            (event.target === overlaySoundBtn || event.target === soundBtn)) {
+          return;
+        }
+        if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
+          event.preventDefault();
+          advanceOverlay();
+        }
+      });
+
+      function parseBoard(text) {
+        const categories = [];
+        let title = "Jeopardy";
+        let current = null;
+
+        String(text).split(/\r?\n/).forEach(function (raw) {
+          const line = raw.trim();
+          if (!line || line.charAt(0) === "#") {
+            return;
+          }
+
+          const titleMatch = line.match(/^TITLE:\s*(.+)$/i);
+          if (titleMatch) {
+            title = titleMatch[1].trim();
+            return;
+          }
+
+          if (/^ROUND:\s*/i.test(line)) {
+            current = null;
+            return;
+          }
+
+          const categoryMatch = line.match(/^CATEGORY:\s*(.+)$/i);
+          if (categoryMatch) {
+            current = { name: categoryMatch[1].trim(), clues: [] };
+            categories.push(current);
+            return;
+          }
+
+          const parts = line.split("|").map(function (part) {
+            return part.trim();
+          });
+          const clue = partsToClue(parts);
+          if (!clue) {
+            showError("This line needs an answer and a question, separated by |\n\n" + line);
+            current = null;
+            return;
+          }
+          if (!current) {
+            showError("Add a CATEGORY: line before the first clue.");
+            return;
+          }
+
+          current.clues.push(clue);
+        });
+
+        if (errorEl.classList.contains("open")) {
+          return null;
+        }
+        if (!categories.length) {
+          showError("No categories found in board.txt. Add at least one CATEGORY: line.");
+          return null;
+        }
+
+        const emptyCategory = categories.find(function (category) {
+          return !category.clues.length;
+        });
+        if (emptyCategory) {
+          showError("Add clues under " + emptyCategory.name + ".");
+          return null;
+        }
+
+        return { title: title, categories: categories };
+      }
+
+      function partsToClue(parts) {
+        if (!parts.length || !parts[0]) {
+          return null;
+        }
+        if (/^\$?\d+$/.test(parts[0]) && parts.length >= 3 && parts[1]) {
+          return {
+            answer: parts[1],
+            question: parts.slice(2).join(" | ")
+          };
+        }
+        if (parts.length >= 2 && parts[1]) {
+          return {
+            answer: parts[0],
+            question: parts.slice(1).join(" | ")
+          };
+        }
+        return null;
+      }
+
+      function dealFromPool(source) {
+        const order = shuffle(source.categories.map(function (_, index) {
+          return index;
+        }));
+        const rounds = [];
+        let cursor = 0;
+
+        ROUND_PLAN.forEach(function (plan) {
+          const take = Math.min(CATEGORIES_PER_ROUND, order.length - cursor);
+          if (take < 1) {
+            return;
+          }
+          const chosen = order.slice(cursor, cursor + take);
+          cursor += take;
+          rounds.push({
+            name: plan.name,
+            categories: chosen.map(function (categoryIndex) {
+              const category = source.categories[categoryIndex];
+              const picks = pickClueIndexes(category.clues.length, CLUES_ON_BOARD);
+              return {
+                name: category.name,
+                clues: picks.map(function (clueIndex, slot) {
+                  const clue = category.clues[clueIndex];
+                  return {
+                    value: plan.values[Math.min(slot, plan.values.length - 1)],
+                    answer: clue.answer,
+                    question: clue.question
+                  };
+                })
+              };
+            })
+          });
+        });
+
+        return { title: source.title, rounds: rounds };
+      }
+
+      function pickClueIndexes(total, slots) {
+        const count = Math.min(slots, total);
+        const picks = [];
+        if (total <= slots) {
+          for (let i = 0; i < total; i++) {
+            picks.push(i);
+          }
+          return picks;
+        }
+
+        const used = {};
+        for (let slot = 0; slot < count; slot++) {
+          const start = Math.floor(slot * total / count);
+          let end = Math.floor((slot + 1) * total / count);
+          if (end <= start) {
+            end = start + 1;
+          }
+          const choices = [];
+          for (let i = start; i < end && i < total; i++) {
+            if (!used[i]) {
+              choices.push(i);
+            }
+          }
+          if (!choices.length) {
+            for (let i = 0; i < total; i++) {
+              if (!used[i]) {
+                choices.push(i);
+              }
+            }
+          }
+          const pick = choices[Math.floor(Math.random() * choices.length)];
+          used[pick] = true;
+          picks.push(pick);
+        }
+        return picks;
+      }
+
+      function shuffle(list) {
+        const copy = list.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = copy[i];
+          copy[i] = copy[j];
+          copy[j] = tmp;
+        }
+        return copy;
+      }
+
+      function startNewGame() {
+        const previousKey = storageKey;
+        game = dealFromPool(pool);
+        writeSession(dealStorageKey(), game);
+        storageKey = playedStorageKey();
+        removeSession(previousKey);
+        removeSession(previousKey + ":round");
+        played = new Set();
+        active = null;
+        roundIndex = 0;
+        pendingUnlockPulse = false;
+        savePlayed();
+        saveRound();
+        stopThinkMusic();
+        overlayEl.classList.remove("open", "question");
+        renderAll();
+      }
+
+      function loadOrDeal() {
+        const saved = readSession(dealStorageKey());
+        if (dealIsUsable(saved)) {
+          return saved;
+        }
+        const dealt = dealFromPool(pool);
+        writeSession(dealStorageKey(), dealt);
+        return dealt;
+      }
+
+      function dealIsUsable(deal) {
+        if (!deal || !deal.title || !Array.isArray(deal.rounds) || !deal.rounds.length) {
+          return false;
+        }
+        return deal.rounds.every(function (round) {
+          return round && round.name && Array.isArray(round.categories) && round.categories.length &&
+            round.categories.every(function (category) {
+              return category && category.name && Array.isArray(category.clues) &&
+                category.clues.every(function (clue) {
+                  return clue && clue.value && clue.answer && clue.question;
+                });
+            });
+        });
+      }
+
+      function dealStorageKey() {
+        return "jeopardy-deal:" + hashText(BOARD);
+      }
+
+      function playedStorageKey() {
+        return "jeopardy-played:" + hashText(JSON.stringify(game));
+      }
+
+      function renderAll() {
+        renderRoundNav();
+        renderUnlockBar();
+        renderBoard();
+      }
+
+      function renderRoundNav() {
+        roundNav.innerHTML = "";
+        if (game.rounds.length < 2) {
+          roundNav.hidden = true;
+          return;
+        }
+
+        roundNav.hidden = false;
+        game.rounds.forEach(function (round, index) {
+          const button = document.createElement("button");
+          const locked = !canOpenRound(index);
+          button.type = "button";
+          button.className = "round-btn" + (index === roundIndex ? " active" : "");
+          button.textContent = round.name;
+          button.disabled = locked;
+          button.setAttribute("aria-current", index === roundIndex ? "page" : "false");
+          if (locked) {
+            const left = cluesRemaining(index - 1);
+            button.title = "Reveal every clue to unlock (" + left + " left)";
+            button.setAttribute("aria-label", round.name + ", locked, " + left + " clues left");
+          }
+          if (index > 0 && pendingUnlockPulse && !locked) {
+            button.classList.add("just-unlocked");
+          }
+          button.addEventListener("click", function () {
+            showRound(index);
+          });
+          roundNav.appendChild(button);
+        });
+        pendingUnlockPulse = false;
+      }
+
+      function renderUnlockBar() {
+        const next = game.rounds[roundIndex + 1];
+        const show = !!(next && canOpenRound(roundIndex + 1));
+        unlockBar.classList.toggle("open", show);
+        if (!show) {
+          return;
+        }
+        unlockMessage.textContent = "All clues are revealed. " + next.name + " is unlocked.";
+        goDoubleBtn.textContent = "Play " + next.name;
+      }
+
+      function renderBoard() {
+        boardEl.innerHTML = "";
+        const round = game.rounds[roundIndex];
+        const columns = round.categories.length;
+        const rows = 1 + round.categories.reduce(function (max, category) {
+          return Math.max(max, category.clues.length);
+        }, 0);
+
+        boardEl.style.gridTemplateColumns = "repeat(" + columns + ", minmax(0, 1fr))";
+        boardEl.style.gridTemplateRows = "repeat(" + rows + ", minmax(0, 1fr))";
+
+        round.categories.forEach(function (category, categoryIndex) {
+          const header = document.createElement("div");
+          header.className = "cell header";
+          header.textContent = category.name;
+          header.style.gridColumn = String(categoryIndex + 1);
+          header.style.gridRow = "1";
+          boardEl.appendChild(header);
+
+          category.clues.forEach(function (clue, clueIndex) {
+            const id = clueId(roundIndex, categoryIndex, clueIndex);
+            const cell = document.createElement("button");
+            cell.type = "button";
+            cell.className = "cell clue" + (played.has(id) ? " played" : "");
+            cell.textContent = "$" + String(clue.value).replace(/^\$/, "");
+            cell.style.gridColumn = String(categoryIndex + 1);
+            cell.style.gridRow = String(clueIndex + 2);
+            cell.disabled = played.has(id);
+            cell.addEventListener("click", function () {
+              openClue(category, clue, id);
+            });
+            boardEl.appendChild(cell);
+          });
+        });
+      }
+
+      function showRound(index) {
+        if (active || index === roundIndex || !canOpenRound(index)) {
+          return;
+        }
+        roundIndex = index;
+        saveRound();
+        renderAll();
+      }
+
+      function canOpenRound(index) {
+        if (index <= 0) {
+          return index === 0;
+        }
+        if (index >= game.rounds.length) {
+          return false;
+        }
+        return isRoundComplete(index - 1);
+      }
+
+      function isRoundComplete(index) {
+        const stats = roundStats(index);
+        return stats.total > 0 && stats.done === stats.total;
+      }
+
+      function cluesRemaining(index) {
+        const stats = roundStats(index);
+        return stats.total - stats.done;
+      }
+
+      function roundStats(index) {
+        const round = game.rounds[index];
+        let total = 0;
+        let done = 0;
+        if (!round) {
+          return { total: 0, done: 0 };
+        }
+        round.categories.forEach(function (category, categoryIndex) {
+          category.clues.forEach(function (clue, clueIndex) {
+            total += 1;
+            if (played.has(clueId(index, categoryIndex, clueIndex))) {
+              done += 1;
+            }
+          });
+        });
+        return { total: total, done: done };
+      }
+
+      function clueId(round, categoryIndex, clueIndex) {
+        return round + ":" + categoryIndex + ":" + clueIndex;
+      }
+
+      function openClue(category, clue, id) {
+        if (played.has(id)) {
+          return;
+        }
+        active = { category: category, clue: clue, id: id, step: "answer" };
+        overlayEl.classList.add("open");
+        overlayEl.classList.remove("question");
+        overlayLabel.textContent = "Answer";
+        overlayMeta.textContent = clueMeta(category, clue);
+        overlayText.textContent = clue.answer;
+        startThinkMusic();
+      }
+
+      function advanceOverlay() {
+        if (!active) {
+          return;
+        }
+        stopThinkMusic();
+        if (active.step === "answer") {
+          active.step = "question";
+          overlayEl.classList.add("question");
+          overlayLabel.textContent = "Question";
+          overlayText.textContent = active.clue.question;
+          return;
+        }
+        const wasComplete = isRoundComplete(roundIndex);
+        played.add(active.id);
+        savePlayed();
+        if (!wasComplete && isRoundComplete(roundIndex) && game.rounds[roundIndex + 1]) {
+          pendingUnlockPulse = true;
+        }
+        active = null;
+        overlayEl.classList.remove("open", "question");
+        renderAll();
+      }
+
+      function clueMeta(category, clue) {
+        const valueLabel = "$" + String(clue.value).replace(/^\$/, "");
+        const roundName = game.rounds.length > 1 ? game.rounds[roundIndex].name + "  •  " : "";
+        return roundName + category.name + "  •  " + valueLabel;
+      }
+
+      function toggleSound() {
+        muted = !muted;
+        saveMuted();
+        updateSoundButtons();
+        if (muted) {
+          stopThinkMusic();
+          return;
+        }
+        if (active && active.step === "answer") {
+          startThinkMusic();
+        }
+      }
+
+      function updateSoundButtons() {
+        const label = muted ? "Music off" : "Music on";
+        const pressed = muted ? "false" : "true";
+        soundBtn.textContent = label;
+        soundBtn.setAttribute("aria-pressed", pressed);
+        overlaySoundBtn.textContent = label;
+        overlaySoundBtn.setAttribute("aria-pressed", pressed);
+      }
+
+      function loadMuted() {
+        try {
+          return window.localStorage.getItem("jeopardy-music") === "off";
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function saveMuted() {
+        try {
+          window.localStorage.setItem("jeopardy-music", muted ? "off" : "on");
+        } catch (error) {
+          // Ignore storage errors so the game still works.
+        }
+      }
+
+      function startThinkMusic() {
+        if (muted) {
+          return;
+        }
+        const begin = function () {
+          thinkAudio.pause();
+          try {
+            thinkAudio.currentTime = 0;
+          } catch (error) {
+            // Metadata may not be ready on the first play.
+          }
+          const pending = thinkAudio.play();
+          if (pending && typeof pending.catch === "function") {
+            pending.catch(function () {
+              // Playback can fail if the file is missing. The board still works.
+            });
+          }
+        };
+        if (thinkAudio.readyState >= 1) {
+          begin();
+          return;
+        }
+        thinkAudio.addEventListener("loadedmetadata", begin, { once: true });
+      }
+
+      function stopThinkMusic() {
+        thinkAudio.pause();
+        try {
+          thinkAudio.currentTime = 0;
+        } catch (error) {
+          // Ignore if the file has not loaded yet.
+        }
+      }
+
+      function loadRoundIndex() {
+        try {
+          const value = Number(readSession(storageKey + ":round"));
+          if (!Number.isInteger(value) || value < 0 || value >= game.rounds.length) {
+            return 0;
+          }
+          for (let earlier = 1; earlier <= value; earlier++) {
+            if (!isRoundComplete(earlier - 1)) {
+              return earlier - 1;
+            }
+          }
+          return value;
+        } catch (error) {
+          return 0;
+        }
+      }
+
+      function saveRound() {
+        writeSession(storageKey + ":round", String(roundIndex));
+      }
+
+      function loadPlayed() {
+        const list = readSession(storageKey);
+        return Array.isArray(list) ? list : [];
+      }
+
+      function savePlayed() {
+        writeSession(storageKey, Array.from(played));
+      }
+
+      function sessionStore() {
+        try {
+          return window.sessionStorage;
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function readSession(key) {
+        const store = sessionStore();
+        if (!store) {
+          return null;
+        }
+        try {
+          const raw = store.getItem(key);
+          return raw ? JSON.parse(raw) : null;
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function writeSession(key, value) {
+        const store = sessionStore();
+        if (!store) {
+          return;
+        }
+        try {
+          store.setItem(key, JSON.stringify(value));
+        } catch (error) {
+          // Ignore storage errors so the game still works.
+        }
+      }
+
+      function removeSession(key) {
+        const store = sessionStore();
+        if (!store) {
+          return;
+        }
+        try {
+          store.removeItem(key);
+        } catch (error) {
+          // Ignore storage errors so the game still works.
+        }
+      }
+
+      function showError(message) {
+        errorEl.textContent = message;
+        errorEl.classList.add("open");
+        boardEl.style.display = "none";
+      }
+
+      function hashText(text) {
+        var hash = 0;
+        var value = String(text);
+        for (var i = 0; i < value.length; i++) {
+          hash = ((hash << 5) - hash) + value.charCodeAt(i);
+          hash |= 0;
+        }
+        return String(hash);
+      }
+    })();
+  </script>
+</body>
+</html>
