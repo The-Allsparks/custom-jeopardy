@@ -6,7 +6,7 @@
   <title>Jeopardy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Source+Serif+4:ital,wght@1,600;1,700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --board-bg: #000814;
@@ -46,6 +46,7 @@
       gap: 16px;
       flex-shrink: 0;
       flex-wrap: wrap;
+      padding-right: 64px;
     }
 
     h1 {
@@ -57,30 +58,74 @@
       text-shadow: 0 2px 0 #7a5c00;
     }
 
-    .header-actions {
+    #title {
+      appearance: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      text-shadow: inherit;
+      cursor: pointer;
+    }
+
+    #title:hover,
+    #title:focus-visible {
+      color: #fff;
+    }
+
+    #title:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    #score-bar {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       justify-content: flex-end;
       gap: 8px;
-      flex-shrink: 0;
+      margin-left: auto;
     }
 
-    #round-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    #round-nav[hidden] {
+    #score-bar[hidden] {
       display: none;
     }
 
-    #reset,
-    #sound,
-    #overlay-sound,
-    .round-btn,
-    #go-double {
+    .score-team {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 4.5rem;
+      padding: 6px 14px;
+      border: 2px solid rgba(0, 0, 0, 0.35);
+      border-radius: 4px;
+      color: #fff;
+      font-size: clamp(1.05rem, 2vw, 1.45rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    }
+
+    .color-swatch {
+      flex-shrink: 0;
+      border: 2px solid #fff;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55);
+    }
+
+    .score-team.bump {
+      animation: score-bump 0.35s ease;
+    }
+
+    @keyframes score-bump {
+      50% { transform: scale(1.06); }
+    }
+
+    #menu-toggle,
+    #sound {
       appearance: none;
       border: 2px solid var(--gold);
       background: #111;
@@ -94,61 +139,114 @@
       border-radius: 4px;
     }
 
-    .round-btn {
-      letter-spacing: 0.08em;
+    #menu {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    #menu-toggle {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+    }
+
+    #menu-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    #menu.open #menu-toggle span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    #menu.open #menu-toggle span:nth-child(2) {
+      opacity: 0;
+    }
+
+    #menu.open #menu-toggle span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    #menu-panel {
+      margin-top: 8px;
+      padding: 8px;
+      max-height: calc(100vh - 80px);
+      overflow: auto;
+      background: #111;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    }
+
+    #menu-panel[hidden] {
+      display: none;
+    }
+
+    #sound {
+      width: 100%;
       white-space: nowrap;
     }
 
-    #reset:hover,
-    #reset:focus-visible,
+    .menu-section {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 204, 0, 0.35);
+    }
+
+    .menu-section[hidden] {
+      display: none;
+    }
+
+    .menu-label {
+      margin-bottom: 8px;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 204, 0, 0.8);
+    }
+
+    .swatch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 196px;
+    }
+
+    .color-swatch {
+      appearance: none;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .color-swatch:hover,
+    .color-swatch:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    #menu-toggle:hover,
+    #menu-toggle:focus-visible,
     #sound:hover,
-    #sound:focus-visible,
-    #overlay-sound:hover,
-    #overlay-sound:focus-visible,
-    .round-btn:hover:not(:disabled),
-    .round-btn:focus-visible:not(:disabled),
-    .round-btn.active,
-    #go-double:hover,
-    #go-double:focus-visible {
+    #sound:focus-visible {
       background: var(--gold);
       color: #111;
-    }
-
-    .round-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .round-btn.just-unlocked {
-      animation: unlock-pulse 1.1s ease-in-out 3;
-    }
-
-    @keyframes unlock-pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); }
-      50% { box-shadow: 0 0 0 8px rgba(255, 204, 0, 0); }
-    }
-
-    #unlock-bar {
-      display: none;
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      padding: 12px 16px;
-      border: 2px solid var(--gold);
-      background: #111;
-      color: var(--gold);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    #unlock-bar.open {
-      display: flex;
-    }
-
-    #unlock-bar p {
-      margin: 0;
     }
 
     #board {
@@ -243,19 +341,60 @@
       color: rgba(255, 255, 255, 0.75);
     }
 
-    #overlay-text {
-      max-width: 18em;
-      font-family: "Playfair Display", Georgia, serif;
+    #overlay-prompt-block {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      max-width: 92vw;
+    }
+
+    #overlay.question #overlay-prompt-block {
+      display: flex;
+    }
+
+    #overlay-prompt-label {
+      font-size: clamp(0.8rem, 1.6vw, 1.05rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    #overlay-prompt {
+      font-family: "Source Serif 4", Georgia, serif;
       font-style: italic;
-      font-weight: 700;
-      font-size: clamp(1.8rem, 5.4vw, 4.4rem);
-      line-height: 1.2;
+      font-weight: 600;
+      font-size: clamp(2rem, 4.8vw, 3.8rem);
+      line-height: 1.35;
       text-align: center;
       text-wrap: balance;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    #overlay-text {
+      max-width: 92vw;
+      font-family: "Source Serif 4", Georgia, serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: clamp(2.8rem, 7vw, 6.2rem);
+      line-height: 1.28;
+      text-align: center;
+      text-wrap: balance;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    #overlay.question {
+      gap: 14px;
+      padding: 4vh 3vw 10vh;
     }
 
     #overlay.question #overlay-text {
       color: var(--gold);
+      width: auto;
+      max-width: none;
+      font-size: 17.6vw;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     #overlay-hint {
@@ -267,11 +406,101 @@
       color: rgba(255, 255, 255, 0.55);
     }
 
-    #overlay-sound {
+    #overlay.has-awards {
+      padding-bottom: 190px;
+    }
+
+    #award-bar {
       position: absolute;
-      top: 24px;
-      right: 24px;
-      z-index: 1;
+      left: 0;
+      right: 0;
+      bottom: 64px;
+      z-index: 4;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      padding: 0 16px;
+    }
+
+    #award-bar[hidden] {
+      display: none;
+    }
+
+    .award-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .award-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .award-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .award-team button {
+      appearance: none;
+      min-width: 76px;
+      height: 52px;
+      border: 3px solid #fff;
+      border-radius: 6px;
+      font: inherit;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .award-team button:hover:not(:disabled),
+    .award-team button:focus-visible:not(:disabled) {
+      filter: brightness(1.12);
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .award-team button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    #overlay-link {
+      display: none;
+      max-width: 40rem;
+      color: var(--gold);
+      font-size: clamp(0.95rem, 1.8vw, 1.25rem);
+      letter-spacing: 0.04em;
+      line-height: 1.35;
+      text-align: center;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      cursor: pointer;
+    }
+
+    #overlay.question #overlay-link.has-source {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 56px;
+      width: fit-content;
+      max-width: min(40rem, 92vw);
+      margin-inline: auto;
+      text-align: center;
+      z-index: 3;
+    }
+
+    #overlay-link:hover,
+    #overlay-link:focus-visible {
+      color: #fff;
     }
 
     #error {
@@ -292,25 +521,40 @@
 </head>
 <body>
   <header>
-    <h1 id="title">Jeopardy</h1>
-    <div class="header-actions">
-      <div id="round-nav" hidden></div>
-      <button id="sound" type="button" aria-pressed="true">Music on</button>
-      <button id="reset" type="button" title="Deal new categories and clues">Reset</button>
-    </div>
+    <h1><button id="title" type="button" title="Deal a new game">Jeopardy</button></h1>
+    <div id="score-bar" hidden></div>
   </header>
-  <div id="unlock-bar" aria-live="polite">
-    <p id="unlock-message">All clues are revealed. Double Jeopardy is unlocked.</p>
-    <button id="go-double" type="button">Play Double Jeopardy</button>
+  <div id="menu">
+    <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+    <div id="menu-panel" hidden>
+      <button id="sound" type="button" aria-pressed="true">Music on</button>
+      <div class="menu-section" id="add-section">
+        <div class="menu-label">Add team</div>
+        <div id="add-teams" class="swatch-row"></div>
+      </div>
+      <div class="menu-section" id="remove-section" hidden>
+        <div class="menu-label">Remove team</div>
+        <div id="remove-teams" class="swatch-row"></div>
+      </div>
+    </div>
   </div>
   <div id="board"></div>
   <div id="error"></div>
   <div id="overlay">
-    <div id="overlay-label"></div>
     <div id="overlay-meta"></div>
+    <div id="overlay-prompt-block">
+      <div id="overlay-prompt-label">Answer</div>
+      <div id="overlay-prompt"></div>
+    </div>
+    <div id="overlay-label"></div>
     <div id="overlay-text"></div>
+    <a id="overlay-link" href="" target="_blank" rel="noopener noreferrer"></a>
+    <div id="award-bar" hidden></div>
     <div id="overlay-hint">Click to continue</div>
-    <button id="overlay-sound" type="button" aria-pressed="true">Music on</button>
   </div>
 
   <script src="board.txt"></script>
@@ -323,13 +567,18 @@
       const overlayLabel = document.getElementById("overlay-label");
       const overlayMeta = document.getElementById("overlay-meta");
       const overlayText = document.getElementById("overlay-text");
-      const resetBtn = document.getElementById("reset");
+      const overlayPrompt = document.getElementById("overlay-prompt");
+      const overlayLink = document.getElementById("overlay-link");
+      const menu = document.getElementById("menu");
+      const menuToggle = document.getElementById("menu-toggle");
+      const menuPanel = document.getElementById("menu-panel");
       const soundBtn = document.getElementById("sound");
-      const overlaySoundBtn = document.getElementById("overlay-sound");
-      const roundNav = document.getElementById("round-nav");
-      const unlockBar = document.getElementById("unlock-bar");
-      const unlockMessage = document.getElementById("unlock-message");
-      const goDoubleBtn = document.getElementById("go-double");
+      const addSection = document.getElementById("add-section");
+      const addTeamsEl = document.getElementById("add-teams");
+      const removeSection = document.getElementById("remove-section");
+      const removeTeamsEl = document.getElementById("remove-teams");
+      const scoreBar = document.getElementById("score-bar");
+      const awardBar = document.getElementById("award-bar");
 
       if (typeof BOARD !== "string") {
         showError("Could not load board.txt. Keep index.html and board.txt in the same folder, then refresh.");
@@ -342,6 +591,16 @@
         { name: "Jeopardy", values: ["200", "400", "600", "800", "1000"] },
         { name: "Double Jeopardy", values: ["400", "800", "1200", "1600", "2000"] }
       ];
+      const TEAM_COLORS = [
+        { id: "red", label: "Red", hex: "#e11d2e" },
+        { id: "blue", label: "Blue", hex: "#2f6bff" },
+        { id: "green", label: "Green", hex: "#18a558" },
+        { id: "yellow", label: "Yellow", hex: "#ffe14a" },
+        { id: "orange", label: "Orange", hex: "#ff8a00" },
+        { id: "purple", label: "Purple", hex: "#9b4dff" },
+        { id: "pink", label: "Pink", hex: "#ff4f9a" },
+        { id: "white", label: "White", hex: "#f7f7f7" }
+      ];
 
       const pool = parseBoard(BOARD);
       if (!pool) {
@@ -353,7 +612,7 @@
       let played = new Set(loadPlayed());
       let active = null;
       let roundIndex = loadRoundIndex();
-      let pendingUnlockPulse = false;
+      let teams = loadTeams();
       const thinkAudio = new Audio(encodeURI("Jeopardy - 1997 - Think Music.mp3"));
       thinkAudio.preload = "auto";
       let muted = loadMuted();
@@ -361,26 +620,59 @@
       titleEl.textContent = game.title;
       document.title = game.title;
       updateSoundButtons();
+      renderTeamMenu();
       renderAll();
 
-      resetBtn.addEventListener("click", function () {
+      titleEl.addEventListener("click", function () {
         if (!window.confirm("Deal a new game? Categories and clues will change, and this board's progress will be cleared.")) {
           return;
         }
         startNewGame();
       });
 
-      goDoubleBtn.addEventListener("click", function () {
-        showRound(roundIndex + 1);
+      menuToggle.addEventListener("click", function () {
+        if (menu.classList.contains("open")) {
+          closeMenu();
+          return;
+        }
+        openMenu();
       });
 
       soundBtn.addEventListener("click", toggleSound);
-      overlaySoundBtn.addEventListener("click", function (event) {
+      awardBar.addEventListener("click", function (event) {
         event.stopPropagation();
-        toggleSound();
       });
 
-      overlayEl.addEventListener("click", advanceOverlay);
+      document.addEventListener("click", function (event) {
+        if (!menu.classList.contains("open") || menu.contains(event.target)) {
+          return;
+        }
+        closeMenu();
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+
+      window.addEventListener("resize", function () {
+        if (active && active.step === "question") {
+          fitQuestionText();
+        }
+      });
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+          if (active && active.step === "question") {
+            fitQuestionText();
+          }
+        });
+      }
+
+      overlayEl.addEventListener("click", function (event) {
+        if (event.target.closest("#overlay-link") || event.target.closest("#award-bar")) {
+          event.stopPropagation();
+          return;
+        }
+        advanceOverlay();
+      });
 
       document.addEventListener("keydown", function (event) {
         if (event.key === "m" || event.key === "M") {
@@ -391,11 +683,16 @@
           toggleSound();
           return;
         }
+        if (event.key === "Escape" && menu.classList.contains("open")) {
+          event.preventDefault();
+          closeMenu();
+          return;
+        }
         if (!overlayEl.classList.contains("open")) {
           return;
         }
         if ((event.key === "Enter" || event.key === " ") &&
-            (event.target === overlaySoundBtn || event.target === soundBtn)) {
+            (menu.contains(event.target) || awardBar.contains(event.target) || event.target === overlayLink)) {
           return;
         }
         if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
@@ -473,19 +770,33 @@
         if (!parts.length || !parts[0]) {
           return null;
         }
-        if (/^\$?\d+$/.test(parts[0]) && parts.length >= 3 && parts[1]) {
-          return {
-            answer: parts[1],
-            question: parts.slice(2).join(" | ")
-          };
+        var items = parts.slice();
+        if (/^\$?\d+$/.test(items[0]) && items.length >= 3 && items[1]) {
+          items = items.slice(1);
         }
-        if (parts.length >= 2 && parts[1]) {
-          return {
-            answer: parts[0],
-            question: parts.slice(1).join(" | ")
-          };
+        if (items.length < 2 || !items[1]) {
+          return null;
         }
-        return null;
+
+        var url = "";
+        var citation = "";
+        var questionEnd = items.length;
+        var last = items[items.length - 1];
+        if (items.length >= 3 && /^https?:\/\//i.test(last)) {
+          url = last;
+          questionEnd = items.length - 1;
+          if (questionEnd > 2) {
+            citation = items[questionEnd - 1];
+            questionEnd -= 1;
+          }
+        }
+
+        return {
+          answer: items[0],
+          question: items.slice(1, questionEnd).join(" | "),
+          citation: citation,
+          url: url
+        };
       }
 
       function dealFromPool(source) {
@@ -514,7 +825,9 @@
                   return {
                     value: plan.values[Math.min(slot, plan.values.length - 1)],
                     answer: clue.answer,
-                    question: clue.question
+                    question: clue.question,
+                    citation: clue.citation || "",
+                    url: clue.url || ""
                   };
                 })
               };
@@ -583,11 +896,15 @@
         played = new Set();
         active = null;
         roundIndex = 0;
-        pendingUnlockPulse = false;
+        teams.forEach(function (team) {
+          team.score = 0;
+        });
+        saveTeams();
         savePlayed();
         saveRound();
         stopThinkMusic();
         overlayEl.classList.remove("open", "question");
+        renderAwardBar();
         renderAll();
       }
 
@@ -625,52 +942,201 @@
       }
 
       function renderAll() {
-        renderRoundNav();
-        renderUnlockBar();
         renderBoard();
+        renderScoreBar();
       }
 
-      function renderRoundNav() {
-        roundNav.innerHTML = "";
-        if (game.rounds.length < 2) {
-          roundNav.hidden = true;
+      function colorById(id) {
+        for (let i = 0; i < TEAM_COLORS.length; i++) {
+          if (TEAM_COLORS[i].id === id) {
+            return TEAM_COLORS[i];
+          }
+        }
+        return null;
+      }
+
+      function teamById(id) {
+        for (let i = 0; i < teams.length; i++) {
+          if (teams[i].id === id) {
+            return teams[i];
+          }
+        }
+        return null;
+      }
+
+      function loadTeams() {
+        const saved = readSession("jeopardy-teams");
+        if (!Array.isArray(saved)) {
+          return [];
+        }
+        const seen = {};
+        const loaded = [];
+        saved.forEach(function (item) {
+          if (!item || seen[item.id] || !colorById(item.id)) {
+            return;
+          }
+          const score = Number(item.score);
+          seen[item.id] = true;
+          loaded.push({ id: item.id, score: Number.isFinite(score) ? score : 0 });
+        });
+        return loaded;
+      }
+
+      function saveTeams() {
+        writeSession("jeopardy-teams", teams);
+      }
+
+      function addTeam(id) {
+        if (!colorById(id) || teamById(id)) {
           return;
         }
-
-        roundNav.hidden = false;
-        game.rounds.forEach(function (round, index) {
-          const button = document.createElement("button");
-          const locked = !canOpenRound(index);
-          button.type = "button";
-          button.className = "round-btn" + (index === roundIndex ? " active" : "");
-          button.textContent = round.name;
-          button.disabled = locked;
-          button.setAttribute("aria-current", index === roundIndex ? "page" : "false");
-          if (locked) {
-            const left = cluesRemaining(index - 1);
-            button.title = "Reveal every clue to unlock (" + left + " left)";
-            button.setAttribute("aria-label", round.name + ", locked, " + left + " clues left");
-          }
-          if (index > 0 && pendingUnlockPulse && !locked) {
-            button.classList.add("just-unlocked");
-          }
-          button.addEventListener("click", function () {
-            showRound(index);
-          });
-          roundNav.appendChild(button);
-        });
-        pendingUnlockPulse = false;
+        teams.push({ id: id, score: 0 });
+        saveTeams();
+        renderTeamMenu();
+        renderScoreBar();
+        renderAwardBar();
       }
 
-      function renderUnlockBar() {
-        const next = game.rounds[roundIndex + 1];
-        const show = !!(next && canOpenRound(roundIndex + 1));
-        unlockBar.classList.toggle("open", show);
+      function removeTeam(id) {
+        teams = teams.filter(function (team) {
+          return team.id !== id;
+        });
+        saveTeams();
+        renderTeamMenu();
+        renderScoreBar();
+        renderAwardBar();
+      }
+
+      function adjustScore(id, delta) {
+        const team = teamById(id);
+        if (!team || !delta) {
+          return;
+        }
+        team.score += delta;
+        saveTeams();
+        renderScoreBar(id);
+      }
+
+      function clueAmount(clue) {
+        const amount = parseInt(String(clue.value).replace(/[^0-9]/g, ""), 10);
+        return Number.isFinite(amount) ? amount : 0;
+      }
+
+      function formatMoney(amount) {
+        return String(amount);
+      }
+
+      function inkFor(hex) {
+        const rgb = String(hex).replace("#", "");
+        const r = parseInt(rgb.slice(0, 2), 16);
+        const g = parseInt(rgb.slice(2, 4), 16);
+        const b = parseInt(rgb.slice(4, 6), 16);
+        const luminance = ((0.299 * r) + (0.587 * g) + (0.114 * b)) / 255;
+        return luminance > 0.72 ? "#111" : "#fff";
+      }
+
+      function colorButton(color, label, onClick) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "color-swatch";
+        button.style.background = color.hex;
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        button.addEventListener("click", function (event) {
+          event.stopPropagation();
+          onClick();
+        });
+        return button;
+      }
+
+      function renderTeamMenu() {
+        const used = {};
+        addTeamsEl.innerHTML = "";
+        removeTeamsEl.innerHTML = "";
+        teams.forEach(function (team) {
+          used[team.id] = true;
+        });
+        TEAM_COLORS.forEach(function (color) {
+          if (used[color.id]) {
+            removeTeamsEl.appendChild(colorButton(color, "Remove " + color.label, function () {
+              removeTeam(color.id);
+            }));
+            return;
+          }
+          addTeamsEl.appendChild(colorButton(color, "Add " + color.label, function () {
+            addTeam(color.id);
+          }));
+        });
+        addSection.hidden = addTeamsEl.childElementCount === 0;
+        removeSection.hidden = teams.length === 0;
+      }
+
+      function renderScoreBar(bumpedId) {
+        scoreBar.innerHTML = "";
+        scoreBar.hidden = teams.length < 2;
+        if (scoreBar.hidden) {
+          return;
+        }
+        teams.forEach(function (team) {
+          const color = colorById(team.id);
+          const item = document.createElement("div");
+          item.className = "score-team" + (team.id === bumpedId ? " bump" : "");
+          item.style.background = color.hex;
+          item.style.color = inkFor(color.hex);
+          item.setAttribute("aria-label", color.label + ", " + formatMoney(team.score));
+          item.textContent = formatMoney(team.score);
+          scoreBar.appendChild(item);
+        });
+      }
+
+      function renderAwardBar() {
+        awardBar.innerHTML = "";
+        const show = !!(active && active.step === "answer" && teams.length >= 2);
+        awardBar.hidden = !show;
+        overlayEl.classList.toggle("has-awards", show);
         if (!show) {
           return;
         }
-        unlockMessage.textContent = "All clues are revealed. " + next.name + " is unlocked.";
-        goDoubleBtn.textContent = "Play " + next.name;
+        const value = clueAmount(active.clue);
+        teams.forEach(function (team) {
+          const color = colorById(team.id);
+          const ink = inkFor(color.hex);
+          const group = document.createElement("div");
+          group.className = "award-team";
+          const caption = document.createElement("div");
+          caption.className = "award-label";
+          caption.textContent = color.label;
+          const actions = document.createElement("div");
+          actions.className = "award-actions";
+          actions.appendChild(awardButton(color, ink, "+", value, "Add " + formatMoney(value) + " for " + color.label));
+          actions.appendChild(awardButton(color, ink, "−", -value, "Subtract " + formatMoney(value) + " for " + color.label));
+          group.appendChild(caption);
+          group.appendChild(actions);
+          awardBar.appendChild(group);
+        });
+      }
+
+      function awardButton(color, ink, symbol, delta, label) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = symbol;
+        button.style.background = color.hex;
+        button.style.color = ink;
+        button.setAttribute("aria-label", label);
+        let used = false;
+        button.addEventListener("click", function (event) {
+          event.stopPropagation();
+          if (used) {
+            return;
+          }
+          used = true;
+          button.disabled = true;
+          adjustScore(color.id, delta);
+          if (delta > 0) {
+            advanceOverlay();
+          }
+        });
+        return button;
       }
 
       function renderBoard() {
@@ -709,15 +1175,6 @@
         });
       }
 
-      function showRound(index) {
-        if (active || index === roundIndex || !canOpenRound(index)) {
-          return;
-        }
-        roundIndex = index;
-        saveRound();
-        renderAll();
-      }
-
       function canOpenRound(index) {
         if (index <= 0) {
           return index === 0;
@@ -731,11 +1188,6 @@
       function isRoundComplete(index) {
         const stats = roundStats(index);
         return stats.total > 0 && stats.done === stats.total;
-      }
-
-      function cluesRemaining(index) {
-        const stats = roundStats(index);
-        return stats.total - stats.done;
       }
 
       function roundStats(index) {
@@ -770,6 +1222,11 @@
         overlayLabel.textContent = "Answer";
         overlayMeta.textContent = clueMeta(category, clue);
         overlayText.textContent = clue.answer;
+        overlayPrompt.textContent = "";
+        hideSource();
+        clearQuestionFit();
+        console.log("[Judge] " + clueMeta(category, clue) + "\n" + clue.question);
+        renderAwardBar();
         startThinkMusic();
       }
 
@@ -782,24 +1239,119 @@
           active.step = "question";
           overlayEl.classList.add("question");
           overlayLabel.textContent = "Question";
+          overlayPrompt.textContent = active.clue.answer;
           overlayText.textContent = active.clue.question;
+          showSource(active.clue);
+          fitQuestionText();
+          renderAwardBar();
           return;
         }
+        hideSource();
+        clearQuestionFit();
         const wasComplete = isRoundComplete(roundIndex);
         played.add(active.id);
         savePlayed();
-        if (!wasComplete && isRoundComplete(roundIndex) && game.rounds[roundIndex + 1]) {
-          pendingUnlockPulse = true;
-        }
         active = null;
         overlayEl.classList.remove("open", "question");
+        renderAwardBar();
+        if (!wasComplete && isRoundComplete(roundIndex) && canOpenRound(roundIndex + 1)) {
+          roundIndex += 1;
+          saveRound();
+        }
         renderAll();
+      }
+
+      function showSource(clue) {
+        var citation = clue.citation || "";
+        var url = clue.url || "";
+        if (!citation && !url) {
+          hideSource();
+          return;
+        }
+        overlayLink.textContent = citation || "Competition Manual";
+        if (url) {
+          overlayLink.setAttribute("href", url);
+          overlayLink.title = "Opens in a new tab";
+        } else {
+          overlayLink.removeAttribute("href");
+          overlayLink.removeAttribute("title");
+        }
+        overlayLink.classList.add("has-source");
+      }
+
+      function hideSource() {
+        overlayLink.classList.remove("has-source");
+        overlayLink.textContent = "";
+        overlayLink.removeAttribute("href");
+        overlayLink.removeAttribute("title");
+      }
+
+      function fitQuestionText() {
+        if (!active || active.step !== "question") {
+          clearQuestionFit();
+          return;
+        }
+        var target = Math.floor(window.innerWidth * 0.77);
+        var heightCap = Math.floor(window.innerHeight * 0.34);
+        overlayText.style.whiteSpace = "nowrap";
+        overlayText.style.width = "auto";
+        overlayText.style.maxWidth = "none";
+        overlayText.style.fontSize = "100px";
+        var measured = overlayText.scrollWidth;
+        if (!measured) {
+          return;
+        }
+        var size = Math.floor((100 * target) / measured);
+        var heightAtSize = overlayText.scrollHeight * (size / 100);
+        if (heightAtSize > heightCap) {
+          size = Math.floor(size * heightCap / heightAtSize);
+        }
+        var minHuge = Math.max(77, Math.floor(window.innerWidth * 0.096));
+        if (size < minHuge) {
+          overlayText.style.whiteSpace = "normal";
+          overlayText.style.width = target + "px";
+          overlayText.style.maxWidth = target + "px";
+          size = Math.min(Math.floor(window.innerWidth * 0.112), heightCap);
+          overlayText.style.fontSize = size + "px";
+          while (size > 64 && overlayText.scrollHeight > heightCap) {
+            size -= 4;
+            overlayText.style.fontSize = size + "px";
+          }
+          return;
+        }
+        overlayText.style.fontSize = size + "px";
+      }
+
+      function clearQuestionFit() {
+        overlayText.style.fontSize = "";
+        overlayText.style.width = "";
+        overlayText.style.maxWidth = "";
+        overlayText.style.whiteSpace = "";
       }
 
       function clueMeta(category, clue) {
         const valueLabel = "$" + String(clue.value).replace(/^\$/, "");
         const roundName = game.rounds.length > 1 ? game.rounds[roundIndex].name + "  •  " : "";
         return roundName + category.name + "  •  " + valueLabel;
+      }
+
+      function openMenu() {
+        menu.classList.add("open");
+        menuPanel.hidden = false;
+        menuToggle.setAttribute("aria-expanded", "true");
+        menuToggle.setAttribute("aria-label", "Close menu");
+        soundBtn.focus();
+      }
+
+      function closeMenu() {
+        const restoreFocus = menuPanel.contains(document.activeElement);
+        menu.classList.remove("open");
+        menuPanel.hidden = true;
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute("aria-label", "Menu");
+        if (restoreFocus) {
+          menuToggle.focus();
+        }
       }
 
       function toggleSound() {
@@ -820,8 +1372,6 @@
         const pressed = muted ? "false" : "true";
         soundBtn.textContent = label;
         soundBtn.setAttribute("aria-pressed", pressed);
-        overlaySoundBtn.textContent = label;
-        overlaySoundBtn.setAttribute("aria-pressed", pressed);
       }
 
       function loadMuted() {
