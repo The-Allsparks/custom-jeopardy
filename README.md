@@ -52,11 +52,11 @@ Teams stay in this browser. A new deal sets every score back to zero and keeps t
 
 ## Music
 
-Think music plays while the answer is on screen when this file sits next to `index.html`:
+Think music plays while the answer is on screen. The page loads it from the Internet Archive, so Chrome needs an internet connection:
 
-`Jeopardy - 1997 - Think Music.mp3`
+[Jeopardy - 1997 - Think Music](https://archive.org/download/tvtunes_29826/Jeopardy%20-%201997%20-%20Think%20Music.mp3)
 
-That file is not in this repository. The board still works without it. Turn music off in the menu, or press M.
+Turn music off in the menu, or press M. The board still works if the music cannot play.
 
 ## Edit the clues
 
