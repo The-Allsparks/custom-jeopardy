@@ -95,7 +95,6 @@
     #room {
       display: flex;
       align-items: center;
-      gap: 10px;
     }
 
     #room[hidden] {
@@ -103,32 +102,65 @@
     }
 
     #room-code {
+      position: absolute;
+      inset: 3px;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 8px;
+      background: #000814;
       color: var(--gold);
-      font-size: clamp(1.3rem, 2.6vw, 2rem);
-      letter-spacing: 0.18em;
+      font-size: 1.15rem;
+      letter-spacing: 0.12em;
+      opacity: 0;
+      pointer-events: none;
     }
 
-    #room-link {
-      color: #fff;
-      font-size: 0.85rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+    #room-qr:hover #room-code,
+    #room-qr:focus-visible #room-code {
+      opacity: 1;
     }
 
     #room-qr {
+      position: relative;
       appearance: none;
-      padding: 4px;
+      padding: 3px;
       border: 2px solid var(--gold);
       border-radius: 4px;
       background: #fff;
       line-height: 0;
       cursor: pointer;
+      overflow: hidden;
+    }
+
+    #room-qr:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
     }
 
     #room-qr img {
       display: block;
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
+    }
+
+    #room-qr-label {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      z-index: 2;
+      padding: 2px 0;
+      background: rgba(0, 8, 20, 0.84);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      text-align: center;
+      text-transform: uppercase;
+      pointer-events: none;
     }
 
     #qr-zoom {
@@ -773,14 +805,14 @@
   <header>
     <h1><button id="title" type="button" title="Deal a new game">Jeopardy</button></h1>
     <div id="header-tools">
+      <div id="score-bar" hidden></div>
       <div id="room" hidden>
         <button id="room-qr" type="button" title="Enlarge the buzzer QR code">
-          <img id="room-qr-img" alt="QR code for the buzzer page" width="72" height="72" />
+          <img id="room-qr-img" alt="" width="64" height="64" />
+          <span id="room-code"></span>
+          <span id="room-qr-label">Buzzers</span>
         </button>
-        <span id="room-code"></span>
-        <a id="room-link" href="/buzzer" target="_blank" rel="noopener noreferrer">Buzzers</a>
       </div>
-      <div id="score-bar" hidden></div>
     </div>
     <div id="buzz-lock" hidden><strong></strong><span>Console: resetBuzz()</span></div>
   </header>
@@ -1515,6 +1547,7 @@
       function renderScoreBar(bumpedId) {
         scoreBar.innerHTML = "";
         scoreBar.hidden = teams.length < 2;
+        syncRoomVisibility();
         if (scoreBar.hidden) {
           return;
         }
@@ -2073,14 +2106,13 @@
           return;
         }
         ensureRoomCredentials();
-        const roomEl = document.getElementById("room");
         const codeEl = document.getElementById("room-code");
-        const linkEl = document.getElementById("room-link");
+        const qrButton = document.getElementById("room-qr");
         codeEl.textContent = roomCode;
-        linkEl.href = "/buzzer?room=" + roomCode;
-        linkEl.title = "Players open this page and enter " + roomCode;
+        qrButton.title = "Room " + roomCode + ". Enlarge the buzzer QR code.";
+        qrButton.setAttribute("aria-label", "Buzzers, room " + roomCode + ". Enlarge the QR code.");
         renderRoomQr();
-        roomEl.hidden = false;
+        syncRoomVisibility();
         const protocol = location.protocol === "https:" ? "wss:" : "ws:";
         const socket = new WebSocket(protocol + "//" + location.host + "/room?code=" + roomCode + "&role=host&token=" + encodeURIComponent(roomToken));
         roomSocket = socket;
@@ -2125,6 +2157,10 @@
           roomToken = crypto.randomUUID();
           writeSession("jeopardy-room-token", roomToken);
         }
+      }
+
+      function syncRoomVisibility() {
+        document.getElementById("room").hidden = teams.length < 2 || !roomCode;
       }
 
       function buzzerUrl() {
