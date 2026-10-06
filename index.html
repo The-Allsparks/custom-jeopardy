@@ -83,12 +83,77 @@
       outline-offset: 4px;
     }
 
+    #header-tools {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    #room {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    #room[hidden] {
+      display: none;
+    }
+
+    #room-code {
+      color: var(--gold);
+      font-size: clamp(1.3rem, 2.6vw, 2rem);
+      letter-spacing: 0.18em;
+    }
+
+    #room-link {
+      color: #fff;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    #buzz-lock {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      z-index: 25;
+      transform: translateX(-50%);
+      min-width: 9rem;
+      padding: 10px 18px 8px;
+      border: 3px solid #fff;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    #buzz-lock[hidden] {
+      display: none;
+    }
+
+    #buzz-lock strong {
+      display: block;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #buzz-lock span {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
     #score-bar {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 8px;
-      margin-left: auto;
     }
 
     #score-bar[hidden] {
@@ -659,7 +724,14 @@
 <body>
   <header>
     <h1><button id="title" type="button" title="Deal a new game">Jeopardy</button></h1>
-    <div id="score-bar" hidden></div>
+    <div id="header-tools">
+      <div id="room" hidden>
+        <span id="room-code"></span>
+        <a id="room-link" href="/buzzer" target="_blank" rel="noopener noreferrer">Buzzers</a>
+      </div>
+      <div id="score-bar" hidden></div>
+    </div>
+    <div id="buzz-lock" hidden><strong></strong><span>Console: resetBuzz()</span></div>
   </header>
   <div id="menu">
     <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
@@ -790,6 +862,11 @@
       let active = null;
       let roundIndex = loadRoundIndex();
       let teams = loadTeams();
+      let roomSocket = null;
+      let roomCode = "";
+      let roomToken = "";
+      let buzzWinner = null;
+      const ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       const musicLink = document.getElementById("music-link");
       const credits = document.getElementById("credits");
       const creditsOpen = document.getElementById("credits-open");
@@ -812,6 +889,8 @@
       updateSoundButtons();
       renderTeamMenu();
       renderAll();
+      connectRoom();
+      console.log("[Buzz] resetBuzz() clears the lock.");
       if (usesFirstMaterials(pool)) {
         Array.prototype.forEach.call(document.querySelectorAll(".first-credit"), function (item) {
           item.hidden = false;
@@ -1117,6 +1196,7 @@
         savePlayed();
         saveRound();
         stopThinkMusic();
+        sendRoom({ type: "disarm" });
         overlayEl.classList.remove("open", "question");
         renderAwardBar();
         renderAll();
@@ -1209,6 +1289,7 @@
         renderTeamMenu();
         renderScoreBar();
         renderAwardBar();
+        sendTeams();
       }
 
       function removeTeam(id) {
@@ -1220,6 +1301,7 @@
         renderTeamMenu();
         renderAll();
         renderAwardBar();
+        sendTeams();
       }
 
       function adjustScore(id, delta) {
@@ -1590,6 +1672,7 @@
         console.log("[Judge] " + clueMeta(category, clue) + "\n" + clue.question);
         renderAwardBar();
         startThinkMusic();
+        sendRoom({ type: "arm" });
       }
 
       function advanceOverlay() {
@@ -1597,6 +1680,7 @@
           return;
         }
         stopThinkMusic();
+        sendRoom({ type: "disarm" });
         if (active.step === "answer") {
           active.step = "question";
           overlayEl.classList.add("question");
@@ -1916,6 +2000,104 @@
         errorEl.classList.add("open");
         boardEl.style.display = "none";
       }
+
+      function connectRoom() {
+        if (location.protocol === "file:") {
+          return;
+        }
+        ensureRoomCredentials();
+        const roomEl = document.getElementById("room");
+        const codeEl = document.getElementById("room-code");
+        const linkEl = document.getElementById("room-link");
+        codeEl.textContent = roomCode;
+        linkEl.href = "/buzzer?room=" + roomCode;
+        linkEl.title = "Players open this page and enter " + roomCode;
+        roomEl.hidden = false;
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const socket = new WebSocket(protocol + "//" + location.host + "/room?code=" + roomCode + "&role=host&token=" + encodeURIComponent(roomToken));
+        roomSocket = socket;
+        socket.addEventListener("open", function () {
+          sendTeams();
+          if (active && active.step === "answer") {
+            sendRoom({ type: "arm" });
+          }
+        });
+        socket.addEventListener("message", function (event) {
+          let data;
+          try {
+            data = JSON.parse(event.data);
+          } catch (error) {
+            return;
+          }
+          if (data.type === "state") {
+            renderBuzzLock(data);
+          }
+        });
+        socket.addEventListener("close", function () {
+          if (roomSocket !== socket) {
+            return;
+          }
+          setTimeout(connectRoom, 1000);
+        });
+      }
+
+      function ensureRoomCredentials() {
+        const savedCode = readSession("jeopardy-room-code");
+        const savedToken = readSession("jeopardy-room-token");
+        roomCode = typeof savedCode === "string" ? savedCode : "";
+        roomToken = typeof savedToken === "string" ? savedToken : "";
+        if (!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/.test(roomCode)) {
+          roomCode = "";
+          for (let i = 0; i < 4; i++) {
+            roomCode += ROOM_ALPHABET[Math.floor(Math.random() * ROOM_ALPHABET.length)];
+          }
+          writeSession("jeopardy-room-code", roomCode);
+        }
+        if (!roomToken) {
+          roomToken = crypto.randomUUID();
+          writeSession("jeopardy-room-token", roomToken);
+        }
+      }
+
+      function sendRoom(message) {
+        if (roomSocket && roomSocket.readyState === 1) {
+          roomSocket.send(JSON.stringify(message));
+        }
+      }
+
+      function sendTeams() {
+        sendRoom({
+          type: "teams",
+          colors: teams.map(function (team) {
+            return team.id;
+          })
+        });
+      }
+
+      function renderBuzzLock(state) {
+        const banner = document.getElementById("buzz-lock");
+        const label = banner.querySelector("strong");
+        if (state.winner !== buzzWinner) {
+          buzzWinner = state.winner;
+          if (state.winner) {
+            const color = colorById(state.winner);
+            console.log("[Buzz] " + (color ? color.label : state.winner));
+          }
+        }
+        if (!state.winner) {
+          banner.hidden = true;
+          return;
+        }
+        const color = colorById(state.winner);
+        banner.hidden = false;
+        label.textContent = (color ? color.label : state.winner) + " buzzed";
+        banner.style.background = color ? color.hex : "#111";
+        banner.style.color = color ? inkFor(color.hex) : "#fff";
+      }
+
+      window.resetBuzz = function () {
+        sendRoom({ type: "reset" });
+      };
 
       function hashText(text) {
         var hash = 0;

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Buzz</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #ffcc00;
+      --bg: #000814;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: Oswald, Impact, "Arial Narrow", sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: 1.4rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    #room-name {
+      margin: 6px 0 0;
+      text-align: center;
+      letter-spacing: 0.28em;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    #status {
+      margin: 18px 0;
+      text-align: center;
+      font-size: clamp(1.4rem, 6vw, 2.4rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    form, #colors, #buzz-wrap {
+      width: min(28rem, 100%);
+      margin: 0 auto;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      background: #111;
+      color: #fff;
+      font: inherit;
+      font-size: 2rem;
+      letter-spacing: 0.28em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    button {
+      appearance: none;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    #join, .color-choice, #buzz {
+      border-radius: 4px;
+    }
+
+    #join {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px 18px;
+      border: 2px solid var(--gold);
+      background: var(--gold);
+      color: #111;
+      font-size: 1.3rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    #colors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .color-choice {
+      min-height: 72px;
+      border: 3px solid #fff;
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .color-choice:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    #buzz-wrap {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      width: 100%;
+      max-width: none;
+    }
+
+    #buzz {
+      flex: 1;
+      width: 100%;
+      border: 4px solid #fff;
+      font-size: clamp(3rem, 14vw, 7rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #buzz:disabled {
+      cursor: default;
+      filter: saturate(0.7);
+    }
+
+    #error {
+      margin: 12px auto 0;
+      max-width: 28rem;
+      color: var(--gold);
+      text-align: center;
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>Buzz</h1>
+  <p id="room-name" hidden></p>
+  <p id="status">Join a room</p>
+  <form id="join-form">
+    <label for="code">Room code</label>
+    <input id="code" name="code" maxlength="4" autocapitalize="characters" autocomplete="off" enterkeyhint="join" />
+    <button id="join" type="submit">Join</button>
+  </form>
+  <div id="colors" hidden></div>
+  <div id="buzz-wrap" hidden>
+    <button id="buzz" type="button" disabled>Wait</button>
+  </div>
+  <p id="error" hidden></p>
+  <script>
+    (function () {
+      const COLORS = [
+        { id: "red", label: "Red", hex: "#e11d2e" },
+        { id: "blue", label: "Blue", hex: "#2f6bff" },
+        { id: "green", label: "Green", hex: "#18a558" },
+        { id: "yellow", label: "Yellow", hex: "#ffe14a" },
+        { id: "orange", label: "Orange", hex: "#ff8a00" },
+        { id: "purple", label: "Purple", hex: "#9b4dff" },
+        { id: "pink", label: "Pink", hex: "#ff4f9a" },
+        { id: "white", label: "White", hex: "#f7f7f7" }
+      ];
+      const CODE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
+      const form = document.getElementById("join-form");
+      const codeInput = document.getElementById("code");
+      const roomName = document.getElementById("room-name");
+      const statusEl = document.getElementById("status");
+      const colorsEl = document.getElementById("colors");
+      const buzzWrap = document.getElementById("buzz-wrap");
+      const buzzBtn = document.getElementById("buzz");
+      const errorEl = document.getElementById("error");
+      let socket = null;
+      let roomCode = "";
+      let state = { teams: [], taken: [], armed: false, locked: false, winner: null, you: null };
+      let announced = null;
+
+      function colorById(id) {
+        for (let i = 0; i < COLORS.length; i++) {
+          if (COLORS[i].id === id) {
+            return COLORS[i];
+          }
+        }
+        return null;
+      }
+
+      function inkFor(hex) {
+        const rgb = String(hex).replace("#", "");
+        const r = parseInt(rgb.slice(0, 2), 16);
+        const g = parseInt(rgb.slice(2, 4), 16);
+        const b = parseInt(rgb.slice(4, 6), 16);
+        return ((0.299 * r) + (0.587 * g) + (0.114 * b)) / 255 > 0.72 ? "#111" : "#fff";
+      }
+
+      function showError(message) {
+        errorEl.hidden = !message;
+        errorEl.textContent = message || "";
+      }
+
+      function readCode() {
+        const params = new URLSearchParams(location.search);
+        const fromUrl = (params.get("room") || "").toUpperCase();
+        let saved = "";
+        try {
+          saved = sessionStorage.getItem("buzz-room") || "";
+        } catch (error) {
+          saved = "";
+        }
+        const code = CODE.test(fromUrl) ? fromUrl : saved;
+        if (CODE.test(code)) {
+          codeInput.value = code;
+        }
+      }
+
+      function remember(code, color) {
+        try {
+          sessionStorage.setItem("buzz-room", code);
+          if (color) {
+            sessionStorage.setItem("buzz-color", color);
+          } else {
+            sessionStorage.removeItem("buzz-color");
+          }
+        } catch (error) {
+          // The buzzer still works for this page load.
+        }
+      }
+
+      function savedColor() {
+        try {
+          return sessionStorage.getItem("buzz-color") || "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function send(message) {
+        if (socket && socket.readyState === 1) {
+          socket.send(JSON.stringify(message));
+        }
+      }
+
+      function render() {
+        const mine = state.you ? colorById(state.you) : null;
+        const winner = state.winner ? colorById(state.winner) : null;
+        form.hidden = true;
+        roomName.hidden = false;
+        roomName.textContent = roomCode;
+        if (!mine) {
+          buzzWrap.hidden = true;
+          colorsEl.hidden = false;
+          statusEl.textContent = state.teams.length ? "Pick your color" : "Waiting for teams";
+          colorsEl.innerHTML = "";
+          state.teams.forEach(function (id) {
+            const color = colorById(id);
+            if (!color) {
+              return;
+            }
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "color-choice";
+            button.textContent = color.label;
+            button.style.background = color.hex;
+            button.style.color = inkFor(color.hex);
+            button.disabled = state.taken.indexOf(id) !== -1;
+            button.addEventListener("click", function () {
+              send({ type: "claim", color: id });
+            });
+            colorsEl.appendChild(button);
+          });
+          return;
+        }
+        colorsEl.hidden = true;
+        buzzWrap.hidden = false;
+        buzzBtn.style.background = mine.hex;
+        buzzBtn.style.color = inkFor(mine.hex);
+        const canBuzz = state.armed && !state.locked;
+        buzzBtn.disabled = !canBuzz;
+        if (state.locked && state.winner === mine.id) {
+          statusEl.textContent = "You buzzed";
+          buzzBtn.textContent = mine.label;
+        } else if (state.locked && winner) {
+          statusEl.textContent = winner.label + " buzzed";
+          buzzBtn.textContent = "Locked";
+        } else if (canBuzz) {
+          statusEl.textContent = mine.label;
+          buzzBtn.textContent = "Buzz";
+        } else {
+          statusEl.textContent = "Wait for the answer";
+          buzzBtn.textContent = "Wait";
+        }
+        if (state.winner !== announced) {
+          announced = state.winner;
+          if (state.winner === mine.id && navigator.vibrate) {
+            navigator.vibrate(80);
+          }
+        }
+      }
+
+      function connect(code) {
+        roomCode = code;
+        remember(code, savedColor());
+        showError("");
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const next = new WebSocket(protocol + "//" + location.host + "/room?code=" + code + "&role=player");
+        socket = next;
+        next.addEventListener("open", function () {
+          showError("");
+          const color = savedColor();
+          if (color) {
+            send({ type: "claim", color: color });
+          }
+        });
+        next.addEventListener("message", function (event) {
+          let data;
+          try {
+            data = JSON.parse(event.data);
+          } catch (error) {
+            return;
+          }
+          if (data.type === "error") {
+            remember(code, "");
+            showError(data.message);
+            return;
+          }
+          if (data.type !== "state") {
+            return;
+          }
+          state = data;
+          if (data.you) {
+            remember(code, data.you);
+          }
+          render();
+        });
+        next.addEventListener("close", function () {
+          if (socket !== next) {
+            return;
+          }
+          statusEl.textContent = "Reconnecting";
+          setTimeout(function () {
+            connect(code);
+          }, 1000);
+        });
+      }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const code = codeInput.value.toUpperCase().replace(/[^A-Z2-9]/g, "");
+        if (!CODE.test(code)) {
+          showError("Enter the 4-character room code.");
+          return;
+        }
+        history.replaceState(null, "", "/buzzer?room=" + code);
+        connect(code);
+      });
+
+      buzzBtn.addEventListener("click", function () {
+        buzzBtn.disabled = true;
+        send({ type: "buzz" });
+      });
+
+      readCode();
+      if (CODE.test(codeInput.value)) {
+        connect(codeInput.value);
+      }
+    })();
+  </script>
+</body>
+</html>
