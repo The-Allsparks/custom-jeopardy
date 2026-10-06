@@ -48,7 +48,7 @@
 // ============================================================
 
 const BOARD = `
-TITLE: BIOBUZZ FTC
+TITLE: FTC BIOBUZZ
 
 CATEGORY: The Game
 This is the name of the 2026-2027 FIRST Tech Challenge game | What is BIOBUZZ? | Competition Manual §8, Game Overview | https://ftc-resources.firstinspires.org/ftc/game/cm-html/BIOBUZZ%20Competition%20Manual%20-%20TU02.htm#_Toc241164723

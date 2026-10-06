@@ -7,7 +7,7 @@ A Jeopardy board that runs in Chrome. The game page is `index.html`. The clues a
 | Branch | Board | Use it for |
 | --- | --- | --- |
 | [`main`](https://github.com/The-Allsparks/custom-jeopardy/tree/main) | Classroom Jeopardy | Science, history, and other school topics |
-| [`ftc-biobuzz`](https://github.com/The-Allsparks/custom-jeopardy/tree/ftc-biobuzz) | BIOBUZZ FTC | 2026–2027 FIRST Tech Challenge review |
+| [`ftc-biobuzz`](https://github.com/The-Allsparks/custom-jeopardy/tree/ftc-biobuzz) | FTC BIOBUZZ | 2026–2027 FIRST Tech Challenge review |
 
 Download the branch you want:
 
