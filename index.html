@@ -756,10 +756,13 @@
       const credits = document.getElementById("credits");
       const creditsOpen = document.getElementById("credits-open");
       const creditsClose = document.getElementById("credits-close");
-      const thinkAudio = new Audio(encodeURI("Jeopardy - 1997 - Think Music.mp3"));
+      const LOCAL_TRACK = encodeURI("Jeopardy - 1997 - Think Music.mp3");
+      const ARCHIVE_TRACK = "https://archive.org/download/tvtunes_29826/Jeopardy%20-%201997%20-%20Think%20Music.mp3";
+      const thinkAudio = new Audio();
       thinkAudio.preload = "auto";
       let muted = loadMuted();
       let localTrackMissing = false;
+      const trackReady = chooseThinkTrack();
 
       thinkAudio.addEventListener("error", function () {
         localTrackMissing = true;
@@ -1590,29 +1593,50 @@
         }
       }
 
+      function chooseThinkTrack() {
+        if (location.protocol === "file:") {
+          thinkAudio.src = LOCAL_TRACK;
+          return Promise.resolve();
+        }
+        if (location.hostname.endsWith(".workers.dev")) {
+          thinkAudio.src = ARCHIVE_TRACK;
+          return Promise.resolve();
+        }
+        return fetch(LOCAL_TRACK, { method: "HEAD" }).then(function (response) {
+          thinkAudio.src = response.ok ? LOCAL_TRACK : ARCHIVE_TRACK;
+        }).catch(function () {
+          thinkAudio.src = ARCHIVE_TRACK;
+        });
+      }
+
       function startThinkMusic() {
         if (muted || localTrackMissing) {
           return;
         }
-        const begin = function () {
-          thinkAudio.pause();
-          try {
-            thinkAudio.currentTime = 0;
-          } catch (error) {
-            // Metadata may not be ready on the first play.
+        trackReady.then(function () {
+          if (muted || localTrackMissing || !thinkAudio.src) {
+            return;
           }
-          const pending = thinkAudio.play();
-          if (pending && typeof pending.catch === "function") {
-            pending.catch(function () {
-              // Playback can fail if the file is missing. The board still works.
-            });
+          const begin = function () {
+            thinkAudio.pause();
+            try {
+              thinkAudio.currentTime = 0;
+            } catch (error) {
+              // Metadata may not be ready on the first play.
+            }
+            const pending = thinkAudio.play();
+            if (pending && typeof pending.catch === "function") {
+              pending.catch(function () {
+                // Playback can fail if the browser blocks it. The board still works.
+              });
+            }
+          };
+          if (thinkAudio.readyState >= 1) {
+            begin();
+            return;
           }
-        };
-        if (thinkAudio.readyState >= 1) {
-          begin();
-          return;
-        }
-        thinkAudio.addEventListener("loadedmetadata", begin, { once: true });
+          thinkAudio.addEventListener("loadedmetadata", begin, { once: true });
+        });
       }
 
       function stopThinkMusic() {

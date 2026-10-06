@@ -52,9 +52,9 @@ Teams stay in this browser. A new deal sets every score back to zero and keeps t
 
 ## Music
 
-Think music plays while the answer is on screen when `Jeopardy - 1997 - Think Music.mp3` sits next to `index.html`. That file is not in this repository. When it is missing, the menu links to the track on the Internet Archive: [Jeopardy - 1997 - Think Music](https://archive.org/details/tvtunes_29826).
+Think music plays while the answer is on screen. A file named `Jeopardy - 1997 - Think Music.mp3` next to `index.html` is used when you have it. That file is not in this repository. The hosted board plays the Internet Archive copy instead: [Jeopardy - 1997 - Think Music](https://archive.org/details/tvtunes_29826).
 
-Turn music off in the menu, or press M, when the local file is present. The board still works if the music cannot play.
+Turn music off in the menu, or press M. The board still works if the music cannot play. If neither copy can play, the menu links to the Archive page.
 
 ## Edit the clues
 
