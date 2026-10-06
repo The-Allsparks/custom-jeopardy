@@ -41,7 +41,7 @@ While the answer is on screen, the question is also printed in the browser conso
 
 ## Keep score
 
-Open the menu at the top right. Credits opens the disclaimer, thank-yous, citations, sources, and repository links.
+Open the menu at the top right. Credits introduces The Allsparks, FTC team 36117, with links to [theallsparks.org](https://www.theallsparks.org) and the [donate page](https://www.theallsparks.org/support-us/donations). It also notes that the team is fiscally sponsored by Hack Club, a 501(c)(3), and lists the disclaimer, thank-yous, citations, sources, and repository links.
 
 - Click a color to add a team. The colors are red, blue, green, yellow, orange, purple, pink, and white.
 - Remove a team from the same menu.
