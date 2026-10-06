@@ -317,11 +317,47 @@
     }
 
     .cell.clue.played {
+      position: relative;
       background: var(--played);
       border-color: #151a40;
       color: transparent;
       text-shadow: none;
       cursor: default;
+    }
+
+    .clue-deltas {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px;
+      pointer-events: none;
+    }
+
+    .clue-deltas-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+      pointer-events: auto;
+    }
+
+    .clue-delta {
+      appearance: none;
+      width: clamp(14px, 2vw, 26px);
+      height: clamp(14px, 2vw, 26px);
+      padding: 0;
+      border: 2px solid #fff;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .clue-delta:hover,
+    .clue-delta:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
     }
 
     #overlay {
@@ -749,6 +785,7 @@
       let game = loadOrDeal();
       let storageKey = playedStorageKey();
       let played = new Set(loadPlayed());
+      let clueAwards = loadAwards();
       let active = null;
       let roundIndex = loadRoundIndex();
       let teams = loadTeams();
@@ -1067,7 +1104,9 @@
         storageKey = playedStorageKey();
         removeSession(previousKey);
         removeSession(previousKey + ":round");
+        removeSession(previousKey + ":awards");
         played = new Set();
+        clueAwards = {};
         active = null;
         roundIndex = 0;
         teams.forEach(function (team) {
@@ -1176,8 +1215,9 @@
           return team.id !== id;
         });
         saveTeams();
+        stripAwardsFor(id);
         renderTeamMenu();
-        renderScoreBar();
+        renderAll();
         renderAwardBar();
       }
 
@@ -1188,7 +1228,87 @@
         }
         team.score += delta;
         saveTeams();
+        if (active) {
+          recordAward(active.id, id, delta);
+        }
         renderScoreBar(id);
+      }
+
+      function loadAwards() {
+        const saved = readSession(storageKey + ":awards");
+        if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+          return {};
+        }
+        const loaded = {};
+        Object.keys(saved).forEach(function (clueId) {
+          if (!Array.isArray(saved[clueId])) {
+            return;
+          }
+          const entries = [];
+          saved[clueId].forEach(function (entry) {
+            if (!entry || !colorById(entry.team) || !Number.isFinite(Number(entry.delta)) || !Number(entry.delta)) {
+              return;
+            }
+            entries.push({ team: entry.team, delta: Number(entry.delta) });
+          });
+          if (entries.length) {
+            loaded[clueId] = entries;
+          }
+        });
+        return loaded;
+      }
+
+      function saveAwards() {
+        writeSession(storageKey + ":awards", clueAwards);
+      }
+
+      function recordAward(clueId, teamId, delta) {
+        if (!clueAwards[clueId]) {
+          clueAwards[clueId] = [];
+        }
+        clueAwards[clueId].push({ team: teamId, delta: delta });
+        saveAwards();
+      }
+
+      function stripAwardsFor(teamId) {
+        Object.keys(clueAwards).forEach(function (clueId) {
+          clueAwards[clueId] = clueAwards[clueId].filter(function (entry) {
+            return entry.team !== teamId;
+          });
+          if (!clueAwards[clueId].length) {
+            delete clueAwards[clueId];
+          }
+        });
+        saveAwards();
+      }
+
+      function undoAward(clueId, teamId, sign) {
+        const list = clueAwards[clueId] || [];
+        let removed = 0;
+        const kept = [];
+        list.forEach(function (entry) {
+          const sameSide = entry.team === teamId && ((sign > 0 && entry.delta > 0) || (sign < 0 && entry.delta < 0));
+          if (sameSide) {
+            removed += entry.delta;
+            return;
+          }
+          kept.push(entry);
+        });
+        if (!removed) {
+          return;
+        }
+        if (kept.length) {
+          clueAwards[clueId] = kept;
+        } else {
+          delete clueAwards[clueId];
+        }
+        const team = teamById(teamId);
+        if (team) {
+          team.score -= removed;
+          saveTeams();
+        }
+        saveAwards();
+        renderAll();
       }
 
       function clueAmount(clue) {
@@ -1334,19 +1454,86 @@
 
           category.clues.forEach(function (clue, clueIndex) {
             const id = clueId(roundIndex, categoryIndex, clueIndex);
-            const cell = document.createElement("button");
-            cell.type = "button";
-            cell.className = "cell clue" + (played.has(id) ? " played" : "");
+            const done = played.has(id);
+            const cell = document.createElement(done ? "div" : "button");
+            if (!done) {
+              cell.type = "button";
+              cell.addEventListener("click", function () {
+                openClue(category, clue, id);
+              });
+            }
+            cell.className = "cell clue" + (done ? " played" : "");
             cell.textContent = String(clue.value).replace(/^\$/, "");
             cell.style.gridColumn = String(categoryIndex + 1);
             cell.style.gridRow = String(clueIndex + 2);
-            cell.disabled = played.has(id);
-            cell.addEventListener("click", function () {
-              openClue(category, clue, id);
-            });
+            if (done) {
+              appendClueDeltas(cell, id);
+            }
             boardEl.appendChild(cell);
           });
         });
+      }
+
+      function appendClueDeltas(cell, clueId) {
+        const sides = clueDeltaSides(clueId);
+        if (!sides.gains.length && !sides.losses.length) {
+          return;
+        }
+        const marks = document.createElement("div");
+        marks.className = "clue-deltas";
+        marks.appendChild(deltaSide(clueId, sides.gains, 1));
+        marks.appendChild(deltaSide(clueId, sides.losses, -1));
+        cell.appendChild(marks);
+      }
+
+      function deltaSide(clueId, entries, sign) {
+        const side = document.createElement("div");
+        side.className = "clue-deltas-side";
+        entries.forEach(function (entry) {
+          const color = colorById(entry.team);
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "clue-delta";
+          button.style.background = color.hex;
+          const verb = sign > 0 ? "gained" : "lost";
+          button.setAttribute("aria-label", "Undo " + formatMoney(Math.abs(entry.delta)) + " " + verb + " by " + color.label);
+          button.title = button.getAttribute("aria-label");
+          button.addEventListener("click", function (event) {
+            event.stopPropagation();
+            undoAward(clueId, entry.team, sign);
+          });
+          side.appendChild(button);
+        });
+        return side;
+      }
+
+      function clueDeltaSides(clueId) {
+        const gains = {};
+        const losses = {};
+        (clueAwards[clueId] || []).forEach(function (entry) {
+          if (!teamById(entry.team) || !entry.delta) {
+            return;
+          }
+          if (entry.delta > 0) {
+            gains[entry.team] = (gains[entry.team] || 0) + entry.delta;
+          } else {
+            losses[entry.team] = (losses[entry.team] || 0) + entry.delta;
+          }
+        });
+        return {
+          gains: deltaList(gains),
+          losses: deltaList(losses)
+        };
+      }
+
+      function deltaList(totals) {
+        const list = [];
+        teams.forEach(function (team) {
+          if (totals[team.id]) {
+            list.push({ team: team.id, delta: totals[team.id] });
+          }
+        });
+        return list;
       }
 
       function canOpenRound(index) {
