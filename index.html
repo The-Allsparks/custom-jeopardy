@@ -85,7 +85,7 @@
 
     #header-tools {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 12px;
@@ -93,37 +93,30 @@
     }
 
     #room {
-      display: flex;
-      align-items: center;
+      display: grid;
+      justify-items: center;
+      row-gap: 2px;
     }
 
     #room[hidden] {
       display: none;
     }
 
-    #room-code {
-      position: absolute;
-      inset: 3px;
-      z-index: 1;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding-top: 8px;
-      background: #000814;
-      color: var(--gold);
-      font-size: 1.15rem;
-      letter-spacing: 0.12em;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    #room-qr:hover #room-code,
-    #room-qr:focus-visible #room-code {
-      opacity: 1;
+    #room-qr-label {
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
     #room-qr {
       position: relative;
+      grid-area: 2 / 1;
+      display: grid;
+      place-items: center;
       appearance: none;
       padding: 3px;
       border: 2px solid var(--gold);
@@ -131,7 +124,6 @@
       background: #fff;
       line-height: 0;
       cursor: pointer;
-      overflow: hidden;
     }
 
     #room-qr:focus-visible {
@@ -139,28 +131,43 @@
       outline-offset: 3px;
     }
 
+    #room-code,
     #room-qr img {
+      grid-area: 1 / 1;
+    }
+
+    #room-code {
+      z-index: 0;
+      color: var(--gold);
+      font-size: 0.95rem;
+      letter-spacing: 0.14em;
+      line-height: 1;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #room-qr img {
+      position: relative;
+      z-index: 1;
       display: block;
       width: 64px;
       height: 64px;
     }
 
-    #room-qr-label {
-      position: absolute;
-      left: 3px;
-      right: 3px;
-      bottom: 3px;
-      z-index: 2;
-      padding: 2px 0;
-      background: rgba(0, 8, 20, 0.84);
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      line-height: 1.15;
-      text-align: center;
-      text-transform: uppercase;
-      pointer-events: none;
+    #room:hover #room-code,
+    #room:focus-within #room-code {
+      opacity: 1;
+    }
+
+    #room:hover #room-qr,
+    #room:focus-within #room-qr {
+      background: var(--board-bg);
+    }
+
+    #room:hover #room-qr img,
+    #room:focus-within #room-qr img {
+      opacity: 0;
     }
 
     #qr-zoom {
@@ -807,10 +814,10 @@
     <div id="header-tools">
       <div id="score-bar" hidden></div>
       <div id="room" hidden>
+        <span id="room-qr-label">Buzzers</span>
         <button id="room-qr" type="button" title="Enlarge the buzzer QR code">
-          <img id="room-qr-img" alt="" width="64" height="64" />
           <span id="room-code"></span>
-          <span id="room-qr-label">Buzzers</span>
+          <img id="room-qr-img" alt="" width="64" height="64" />
         </button>
       </div>
     </div>
