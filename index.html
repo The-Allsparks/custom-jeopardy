@@ -94,7 +94,7 @@
 
     #room {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 10px;
     }
 
@@ -113,6 +113,54 @@
       font-size: 0.85rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+    }
+
+    #room-qr {
+      appearance: none;
+      padding: 4px;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      background: #fff;
+      line-height: 0;
+      cursor: pointer;
+    }
+
+    #room-qr img {
+      display: block;
+      width: 72px;
+      height: 72px;
+    }
+
+    #qr-zoom {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.84);
+      cursor: pointer;
+    }
+
+    #qr-zoom[hidden] {
+      display: none;
+    }
+
+    #qr-zoom img {
+      width: min(72vw, 420px);
+      height: auto;
+      padding: 16px;
+      background: #fff;
+    }
+
+    #qr-zoom p {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      letter-spacing: 0.2em;
     }
 
     #buzz-lock {
@@ -726,6 +774,9 @@
     <h1><button id="title" type="button" title="Deal a new game">Jeopardy</button></h1>
     <div id="header-tools">
       <div id="room" hidden>
+        <button id="room-qr" type="button" title="Enlarge the buzzer QR code">
+          <img id="room-qr-img" alt="QR code for the buzzer page" width="72" height="72" />
+        </button>
         <span id="room-code"></span>
         <a id="room-link" href="/buzzer" target="_blank" rel="noopener noreferrer">Buzzers</a>
       </div>
@@ -733,6 +784,10 @@
     </div>
     <div id="buzz-lock" hidden><strong></strong><span>Console: resetBuzz()</span></div>
   </header>
+  <div id="qr-zoom" hidden>
+    <img id="qr-zoom-img" alt="" />
+    <p id="qr-zoom-code"></p>
+  </div>
   <div id="menu">
     <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
       <span aria-hidden="true"></span>
@@ -806,6 +861,7 @@
   </div>
 
   <script src="board.txt"></script>
+  <script src="qrcode.js"></script>
   <script>
     (function () {
       const boardEl = document.getElementById("board");
@@ -959,6 +1015,14 @@
       });
 
       document.addEventListener("keydown", function (event) {
+        const qrZoom = document.getElementById("qr-zoom");
+        if (!qrZoom.hidden) {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            qrZoom.hidden = true;
+          }
+          return;
+        }
         if (!credits.hidden) {
           if (event.key === "Escape") {
             event.preventDefault();
@@ -2015,6 +2079,7 @@
         codeEl.textContent = roomCode;
         linkEl.href = "/buzzer?room=" + roomCode;
         linkEl.title = "Players open this page and enter " + roomCode;
+        renderRoomQr();
         roomEl.hidden = false;
         const protocol = location.protocol === "https:" ? "wss:" : "ws:";
         const socket = new WebSocket(protocol + "//" + location.host + "/room?code=" + roomCode + "&role=host&token=" + encodeURIComponent(roomToken));
@@ -2061,6 +2126,33 @@
           writeSession("jeopardy-room-token", roomToken);
         }
       }
+
+      function buzzerUrl() {
+        return new URL("/buzzer?room=" + roomCode, location.href).href;
+      }
+
+      function renderRoomQr() {
+        if (typeof qrcode !== "function") {
+          return;
+        }
+        const qr = qrcode(0, "M");
+        qr.addData(buzzerUrl());
+        qr.make();
+        const image = qr.createDataURL(8, 2);
+        document.getElementById("room-qr-img").src = image;
+        document.getElementById("qr-zoom-img").src = image;
+        document.getElementById("qr-zoom-img").alt = "QR code for " + buzzerUrl();
+        document.getElementById("qr-zoom-code").textContent = roomCode;
+      }
+
+      document.getElementById("room-qr").addEventListener("click", function (event) {
+        event.stopPropagation();
+        document.getElementById("qr-zoom").hidden = false;
+      });
+
+      document.getElementById("qr-zoom").addEventListener("click", function () {
+        document.getElementById("qr-zoom").hidden = true;
+      });
 
       function sendRoom(message) {
         if (roomSocket && roomSocket.readyState === 1) {
