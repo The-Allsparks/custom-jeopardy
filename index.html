@@ -18,6 +18,11 @@
       --gold-dim: #c9a000;
       --played: #03061f;
       --text: #ffffff;
+      --qr-img: 64px;
+      --qr-box: calc(var(--qr-img) + 10px);
+      --room-label: 0.72rem;
+      --room-gap: 2px;
+      --qr-stack: calc(var(--room-label) + var(--room-gap) + var(--qr-box));
     }
 
     * {
@@ -42,17 +47,20 @@
 
     header {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       gap: 16px;
       flex-shrink: 0;
       flex-wrap: wrap;
-      padding-right: 64px;
     }
 
     h1 {
+      display: flex;
+      align-items: center;
+      height: var(--qr-stack);
       margin: 0;
-      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      font-size: min(var(--qr-stack), 8vw);
+      line-height: 1;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--gold);
@@ -95,7 +103,7 @@
     #room {
       display: grid;
       justify-items: center;
-      row-gap: 2px;
+      row-gap: var(--room-gap);
     }
 
     #room[hidden] {
@@ -104,7 +112,7 @@
 
     #room-qr-label {
       color: #fff;
-      font-size: 0.72rem;
+      font-size: var(--room-label);
       font-weight: 700;
       letter-spacing: 0.08em;
       line-height: 1;
@@ -151,8 +159,8 @@
       position: relative;
       z-index: 1;
       display: block;
-      width: 64px;
-      height: 64px;
+      width: var(--qr-img);
+      height: var(--qr-img);
     }
 
     #room:hover #room-code,
@@ -296,49 +304,37 @@
     }
 
     #menu {
-      position: fixed;
-      top: max(12px, env(safe-area-inset-top));
-      right: max(12px, env(safe-area-inset-right));
+      position: relative;
       z-index: 30;
       display: flex;
+      flex-shrink: 0;
       flex-direction: column;
       align-items: flex-end;
+      align-self: flex-end;
     }
 
     #menu-toggle {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-evenly;
       align-items: center;
-      gap: 5px;
-      width: 48px;
-      height: 48px;
-      padding: 0;
+      width: 28px;
+      height: var(--qr-box);
+      padding: 8px 0;
     }
 
     #menu-toggle span {
       display: block;
-      width: 22px;
-      height: 2px;
+      width: 5px;
+      height: 5px;
       background: currentColor;
-      border-radius: 1px;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-
-    #menu.open #menu-toggle span:nth-child(1) {
-      transform: translateY(7px) rotate(45deg);
-    }
-
-    #menu.open #menu-toggle span:nth-child(2) {
-      opacity: 0;
-    }
-
-    #menu.open #menu-toggle span:nth-child(3) {
-      transform: translateY(-7px) rotate(-45deg);
+      border-radius: 50%;
     }
 
     #menu-panel {
-      margin-top: 8px;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
       padding: 8px;
       max-height: calc(100vh - 80px);
       overflow: auto;
@@ -821,13 +817,7 @@
         </button>
       </div>
     </div>
-    <div id="buzz-lock" hidden><strong></strong><span>Console: resetBuzz()</span></div>
-  </header>
-  <div id="qr-zoom" hidden>
-    <img id="qr-zoom-img" alt="" />
-    <p id="qr-zoom-code"></p>
-  </div>
-  <div id="menu">
+    <div id="menu">
     <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
@@ -848,6 +838,12 @@
         <div id="remove-teams" class="swatch-row"></div>
       </div>
     </div>
+  </div>
+    <div id="buzz-lock" hidden><strong></strong><span>Console: resetBuzz()</span></div>
+  </header>
+  <div id="qr-zoom" hidden>
+    <img id="qr-zoom-img" alt="" />
+    <p id="qr-zoom-code"></p>
   </div>
   <div id="credits" hidden>
     <div class="credits-card" role="dialog" aria-modal="true" aria-labelledby="credits-title">
