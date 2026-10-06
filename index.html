@@ -1509,6 +1509,9 @@
           used = true;
           button.disabled = true;
           adjustScore(color.id, delta);
+          if (color.id === buzzWinner) {
+            window.resetBuzz();
+          }
           if (delta > 0) {
             advanceOverlay();
           }
