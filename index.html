@@ -1334,7 +1334,7 @@
             const cell = document.createElement("button");
             cell.type = "button";
             cell.className = "cell clue" + (played.has(id) ? " played" : "");
-            cell.textContent = "$" + String(clue.value).replace(/^\$/, "");
+            cell.textContent = String(clue.value).replace(/^\$/, "");
             cell.style.gridColumn = String(categoryIndex + 1);
             cell.style.gridRow = String(clueIndex + 2);
             cell.disabled = played.has(id);
@@ -1501,7 +1501,7 @@
       }
 
       function clueMeta(category, clue) {
-        const valueLabel = "$" + String(clue.value).replace(/^\$/, "");
+        const valueLabel = String(clue.value).replace(/^\$/, "");
         const roundName = game.rounds.length > 1 ? game.rounds[roundIndex].name + "  •  " : "";
         return roundName + category.name + "  •  " + valueLabel;
       }

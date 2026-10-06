@@ -30,7 +30,7 @@ Leave off the last line to stay on the classroom board.
 
 1. Open `index.html` in Chrome.
 2. Jeopardy deals 6 categories. Double Jeopardy deals 6 different ones. Each column shows 5 clues, easier at the top and harder at the bottom.
-3. Click a dollar amount. The answer appears, and players respond with a question.
+3. Click a value. The answer appears, and players respond with a question.
 4. Click the screen, or press Enter or Space, to show the question.
 5. Click again to return to the board. That clue stays dark.
 6. When every Jeopardy clue has been played, Double Jeopardy opens on its own.
