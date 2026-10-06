@@ -125,7 +125,8 @@
     }
 
     #menu-toggle,
-    #sound {
+    #sound,
+    #music-link {
       appearance: none;
       border: 2px solid var(--gold);
       background: #111;
@@ -196,9 +197,21 @@
       display: none;
     }
 
-    #sound {
+    #sound,
+    #music-link {
       width: 100%;
       white-space: nowrap;
+    }
+
+    #music-link {
+      display: block;
+      box-sizing: border-box;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    #music-link[hidden] {
+      display: none;
     }
 
     .menu-section {
@@ -532,6 +545,7 @@
     </button>
     <div id="menu-panel" hidden>
       <button id="sound" type="button" aria-pressed="true">Music on</button>
+      <a id="music-link" href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer" hidden>Think music</a>
       <div class="menu-section" id="add-section">
         <div class="menu-label">Add team</div>
         <div id="add-teams" class="swatch-row"></div>
@@ -613,9 +627,16 @@
       let active = null;
       let roundIndex = loadRoundIndex();
       let teams = loadTeams();
-      const thinkAudio = new Audio("https://archive.org/download/tvtunes_29826/Jeopardy%20-%201997%20-%20Think%20Music.mp3");
+      const musicLink = document.getElementById("music-link");
+      const thinkAudio = new Audio(encodeURI("Jeopardy - 1997 - Think Music.mp3"));
       thinkAudio.preload = "auto";
       let muted = loadMuted();
+      let localTrackMissing = false;
+
+      thinkAudio.addEventListener("error", function () {
+        localTrackMissing = true;
+        updateSoundButtons();
+      });
 
       titleEl.textContent = game.title;
       document.title = game.title;
@@ -1340,6 +1361,10 @@
         menuPanel.hidden = false;
         menuToggle.setAttribute("aria-expanded", "true");
         menuToggle.setAttribute("aria-label", "Close menu");
+        if (localTrackMissing) {
+          musicLink.focus();
+          return;
+        }
         soundBtn.focus();
       }
 
@@ -1355,6 +1380,9 @@
       }
 
       function toggleSound() {
+        if (localTrackMissing) {
+          return;
+        }
         muted = !muted;
         saveMuted();
         updateSoundButtons();
@@ -1368,6 +1396,11 @@
       }
 
       function updateSoundButtons() {
+        soundBtn.hidden = localTrackMissing;
+        musicLink.hidden = !localTrackMissing;
+        if (localTrackMissing) {
+          return;
+        }
         const label = muted ? "Music off" : "Music on";
         const pressed = muted ? "false" : "true";
         soundBtn.textContent = label;
@@ -1391,7 +1424,7 @@
       }
 
       function startThinkMusic() {
-        if (muted) {
+        if (muted || localTrackMissing) {
           return;
         }
         const begin = function () {
