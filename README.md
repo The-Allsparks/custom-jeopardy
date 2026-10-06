@@ -41,7 +41,7 @@ While the answer is on screen, the question is also printed in the browser conso
 
 ## Keep score
 
-Open the menu at the top right.
+Open the menu at the top right. Credits opens the disclaimer, thank-yous, citations, sources, and repository links.
 
 - Click a color to add a team. The colors are red, blue, green, yellow, orange, purple, pink, and white.
 - Remove a team from the same menu.

@@ -126,7 +126,9 @@
 
     #menu-toggle,
     #sound,
-    #music-link {
+    #music-link,
+    #credits-open,
+    #credits-close {
       appearance: none;
       border: 2px solid var(--gold);
       background: #111;
@@ -198,7 +200,8 @@
     }
 
     #sound,
-    #music-link {
+    #music-link,
+    #credits-open {
       width: 100%;
       white-space: nowrap;
     }
@@ -516,6 +519,90 @@
       color: #fff;
     }
 
+    #credits {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    #credits[hidden] {
+      display: none;
+    }
+
+    .credits-card {
+      width: min(42rem, 100%);
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      padding: 24px 28px 28px;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      background: #111;
+      color: var(--text);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    .credits-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    #credits-title {
+      margin: 0;
+      color: var(--gold);
+      font-size: 1.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #credits-close {
+      flex-shrink: 0;
+    }
+
+    .credits-card h3 {
+      margin: 18px 0 6px;
+      color: var(--gold);
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .credits-card p,
+    .credits-card li {
+      margin: 0 0 8px;
+      font-family: "Source Serif 4", Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 1.45;
+      text-transform: none;
+    }
+
+    .credits-card ul {
+      margin: 0 0 8px;
+      padding-left: 1.2rem;
+    }
+
+    .credits-card a {
+      color: var(--gold);
+    }
+
+    .credits-card a:hover,
+    .credits-card a:focus-visible {
+      color: #fff;
+    }
+
+    .first-credit[hidden] {
+      display: none;
+    }
+
     #error {
       display: none;
       margin: auto;
@@ -546,6 +633,9 @@
     <div id="menu-panel" hidden>
       <button id="sound" type="button" aria-pressed="true">Music on</button>
       <a id="music-link" href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer" hidden>Think music</a>
+      <div class="menu-section">
+        <button id="credits-open" type="button">Credits</button>
+      </div>
       <div class="menu-section" id="add-section">
         <div class="menu-label">Add team</div>
         <div id="add-teams" class="swatch-row"></div>
@@ -554,6 +644,34 @@
         <div class="menu-label">Remove team</div>
         <div id="remove-teams" class="swatch-row"></div>
       </div>
+    </div>
+  </div>
+  <div id="credits" hidden>
+    <div class="credits-card" role="dialog" aria-modal="true" aria-labelledby="credits-title">
+      <div class="credits-head">
+        <h2 id="credits-title">Credits</h2>
+        <button id="credits-close" type="button">Close</button>
+      </div>
+      <h3>Disclaimer</h3>
+      <p>This is an unofficial classroom board. Jeopardy! is a trademark of Jeopardy Productions, Inc. This page is independent of Jeopardy Productions, Inc. and Sony Pictures Television.</p>
+      <p class="first-credit" hidden>FIRST, FIRST Tech Challenge, and BIOBUZZ are trademarks of For Inspiration and Recognition of Science and Technology (FIRST). This board is a study aid. The Competition Manual and official Team Updates are the rules.</p>
+      <h3>Thank you</h3>
+      <p>Thank you to the Internet Archive for hosting the think music recording.</p>
+      <p class="first-credit" hidden>Thank you to FIRST for publishing the BIOBUZZ Competition Manual and Team Updates.</p>
+      <h3>Citation and source</h3>
+      <p>Think music is “Jeopardy - 1997 - Think Music,” Internet Archive item tvtunes_29826. The Archive lists the original file at televisiontunes.com.</p>
+      <ul>
+        <li><a href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer">Internet Archive</a></li>
+        <li><a href="https://www.televisiontunes.com/Jeopardy_-_1997_-_Think_Music.html" target="_blank" rel="noopener noreferrer">televisiontunes.com</a></li>
+      </ul>
+      <p>When a clue includes a source, the citation and link appear on the question page.</p>
+      <p class="first-credit" hidden>BIOBUZZ clues cite the <a href="https://ftc-resources.firstinspires.org/ftc/game/cm-html/BIOBUZZ%20Competition%20Manual%20-%20TU02.htm" target="_blank" rel="noopener noreferrer">BIOBUZZ Competition Manual, version TU02 (September 24, 2026)</a>. Added clues were checked against Team Update 03. Posted Updates uses Team Updates 00 through 03, through October 1, 2026.</p>
+      <h3>Repository</h3>
+      <ul>
+        <li><a href="https://github.com/The-Allsparks/custom-jeopardy" target="_blank" rel="noopener noreferrer">custom-jeopardy on GitHub</a></li>
+        <li><a href="https://github.com/The-Allsparks/custom-jeopardy/tree/main" target="_blank" rel="noopener noreferrer">main — Classroom Jeopardy</a></li>
+        <li><a href="https://github.com/The-Allsparks/custom-jeopardy/tree/ftc-biobuzz" target="_blank" rel="noopener noreferrer">ftc-biobuzz — BIOBUZZ FTC</a></li>
+      </ul>
     </div>
   </div>
   <div id="board"></div>
@@ -628,6 +746,9 @@
       let roundIndex = loadRoundIndex();
       let teams = loadTeams();
       const musicLink = document.getElementById("music-link");
+      const credits = document.getElementById("credits");
+      const creditsOpen = document.getElementById("credits-open");
+      const creditsClose = document.getElementById("credits-close");
       const thinkAudio = new Audio(encodeURI("Jeopardy - 1997 - Think Music.mp3"));
       thinkAudio.preload = "auto";
       let muted = loadMuted();
@@ -643,6 +764,11 @@
       updateSoundButtons();
       renderTeamMenu();
       renderAll();
+      if (usesFirstMaterials(pool)) {
+        Array.prototype.forEach.call(document.querySelectorAll(".first-credit"), function (item) {
+          item.hidden = false;
+        });
+      }
 
       titleEl.addEventListener("click", function () {
         if (!window.confirm("Deal a new game? Categories and clues will change, and this board's progress will be cleared.")) {
@@ -660,6 +786,16 @@
       });
 
       soundBtn.addEventListener("click", toggleSound);
+      creditsOpen.addEventListener("click", function () {
+        closeMenu();
+        openCredits();
+      });
+      creditsClose.addEventListener("click", closeCredits);
+      credits.addEventListener("click", function (event) {
+        if (event.target === credits) {
+          closeCredits();
+        }
+      });
       awardBar.addEventListener("click", function (event) {
         event.stopPropagation();
       });
@@ -696,6 +832,13 @@
       });
 
       document.addEventListener("keydown", function (event) {
+        if (!credits.hidden) {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            closeCredits();
+          }
+          return;
+        }
         if (event.key === "m" || event.key === "M") {
           if (event.repeat) {
             return;
@@ -1354,6 +1497,23 @@
         const valueLabel = "$" + String(clue.value).replace(/^\$/, "");
         const roundName = game.rounds.length > 1 ? game.rounds[roundIndex].name + "  •  " : "";
         return roundName + category.name + "  •  " + valueLabel;
+      }
+
+      function usesFirstMaterials(source) {
+        const names = [source.title].concat(source.categories.map(function (category) {
+          return category.name;
+        }));
+        return /BIOBUZZ|\bFTC\b|FIRST/i.test(names.join("\n"));
+      }
+
+      function openCredits() {
+        credits.hidden = false;
+        creditsClose.focus();
+      }
+
+      function closeCredits() {
+        credits.hidden = true;
+        menuToggle.focus();
       }
 
       function openMenu() {
