@@ -1608,7 +1608,9 @@
           used = true;
           button.disabled = true;
           adjustScore(color.id, delta);
-          if (color.id === buzzWinner) {
+          if (delta < 0) {
+            sendRoom({ type: "miss", color: color.id });
+          } else if (color.id === buzzWinner) {
             window.resetBuzz();
           }
           if (delta > 0) {
@@ -1774,7 +1776,7 @@
         console.log("[Judge] " + clueMeta(category, clue) + "\n" + clue.question);
         renderAwardBar();
         startThinkMusic();
-        sendRoom({ type: "arm" });
+        sendRoom({ type: "arm", fresh: true });
       }
 
       function advanceOverlay() {
@@ -2210,6 +2212,8 @@
       function renderBuzzLock(state) {
         const banner = document.getElementById("buzz-lock");
         const label = banner.querySelector("strong");
+        const note = banner.querySelector("span");
+        const out = Array.isArray(state.out) ? state.out : [];
         if (state.winner !== buzzWinner) {
           buzzWinner = state.winner;
           if (state.winner) {
@@ -2217,15 +2221,28 @@
             console.log("[Buzz] " + (color ? color.label : state.winner));
           }
         }
-        if (!state.winner) {
-          banner.hidden = true;
+        if (state.winner) {
+          const color = colorById(state.winner);
+          banner.hidden = false;
+          label.textContent = (color ? color.label : state.winner) + " buzzed";
+          note.textContent = "Console: resetBuzz()";
+          banner.style.background = color ? color.hex : "#111";
+          banner.style.color = color ? inkFor(color.hex) : "#fff";
           return;
         }
-        const color = colorById(state.winner);
-        banner.hidden = false;
-        label.textContent = (color ? color.label : state.winner) + " buzzed";
-        banner.style.background = color ? color.hex : "#111";
-        banner.style.color = color ? inkFor(color.hex) : "#fff";
+        if (state.armed && out.length) {
+          const names = out.map(function (id) {
+            const color = colorById(id);
+            return color ? color.label : id;
+          });
+          banner.hidden = false;
+          label.textContent = "Buzzers open";
+          note.textContent = "Out: " + names.join(", ");
+          banner.style.background = "#111";
+          banner.style.color = "#ffcc00";
+          return;
+        }
+        banner.hidden = true;
       }
 
       window.resetBuzz = function () {

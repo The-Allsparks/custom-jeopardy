@@ -193,7 +193,7 @@
       const errorEl = document.getElementById("error");
       let socket = null;
       let roomCode = "";
-      let state = { teams: [], taken: [], armed: false, locked: false, winner: null, you: null };
+      let state = { teams: [], taken: [], armed: false, locked: false, winner: null, out: [], you: null };
       let announced = null;
 
       function colorById(id) {
@@ -294,9 +294,14 @@
         buzzWrap.hidden = false;
         buzzBtn.style.background = mine.hex;
         buzzBtn.style.color = inkFor(mine.hex);
-        const canBuzz = state.armed && !state.locked;
+        const out = Array.isArray(state.out) ? state.out : [];
+        const lockedOut = out.indexOf(mine.id) !== -1;
+        const canBuzz = state.armed && !state.locked && !lockedOut;
         buzzBtn.disabled = !canBuzz;
-        if (state.locked && state.winner === mine.id) {
+        if (state.armed && lockedOut) {
+          statusEl.textContent = "Locked out";
+          buzzBtn.textContent = "Out";
+        } else if (state.locked && state.winner === mine.id) {
           statusEl.textContent = "You buzzed";
           buzzBtn.textContent = mine.label;
         } else if (state.locked && winner) {

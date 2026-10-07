@@ -10,8 +10,22 @@ function emptyRoom() {
     taken: {},
     armed: false,
     locked: false,
-    winner: null
+    winner: null,
+    out: []
   };
+}
+
+function colorList(value) {
+  const list = [];
+  if (!Array.isArray(value)) {
+    return list;
+  }
+  value.forEach(function (color) {
+    if (COLORS.indexOf(color) !== -1 && list.indexOf(color) === -1) {
+      list.push(color);
+    }
+  });
+  return list;
 }
 
 export class BuzzRoom extends DurableObject {
@@ -90,7 +104,7 @@ export class BuzzRoom extends DurableObject {
       this.broadcast(room);
       return;
     }
-    if (data.type === "buzz" && attachment.color && room.armed && !room.locked && room.teams.indexOf(attachment.color) !== -1) {
+    if (data.type === "buzz" && attachment.color && room.armed && !room.locked && room.teams.indexOf(attachment.color) !== -1 && room.out.indexOf(attachment.color) === -1) {
       room.locked = true;
       room.winner = attachment.color;
       await this.save(room);
@@ -121,6 +135,9 @@ export class BuzzRoom extends DurableObject {
         }
       });
       room.teams = teams;
+      room.out = room.out.filter(function (color) {
+        return room.teams.indexOf(color) !== -1;
+      });
       this.releaseMissing(room);
       if (room.winner && room.teams.indexOf(room.winner) === -1) {
         room.winner = null;
@@ -130,15 +147,37 @@ export class BuzzRoom extends DurableObject {
     }
     if (data.type === "arm") {
       room.armed = true;
+      if (data.fresh) {
+        room.locked = false;
+        room.winner = null;
+        room.out = [];
+      }
       return true;
     }
     if (data.type === "disarm") {
       room.armed = false;
+      room.locked = false;
+      room.winner = null;
+      room.out = [];
+      return true;
+    }
+    if (data.type === "miss") {
+      if (COLORS.indexOf(data.color) === -1 || room.teams.indexOf(data.color) === -1) {
+        return false;
+      }
+      if (room.out.indexOf(data.color) === -1) {
+        room.out.push(data.color);
+      }
+      if (room.winner === data.color) {
+        room.winner = null;
+        room.locked = false;
+      }
       return true;
     }
     if (data.type === "reset") {
       room.locked = false;
       room.winner = null;
+      room.out = [];
       return true;
     }
     return false;
@@ -205,6 +244,7 @@ export class BuzzRoom extends DurableObject {
       armed: !!room.armed,
       locked: !!room.locked,
       winner: room.winner || null,
+      out: room.out,
       you: you
     };
   }
@@ -220,7 +260,8 @@ export class BuzzRoom extends DurableObject {
       taken: saved.taken && typeof saved.taken === "object" ? saved.taken : {},
       armed: !!saved.armed,
       locked: !!saved.locked,
-      winner: typeof saved.winner === "string" ? saved.winner : null
+      winner: typeof saved.winner === "string" ? saved.winner : null,
+      out: colorList(saved.out)
     };
   }
 
