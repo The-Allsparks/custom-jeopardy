@@ -82,6 +82,18 @@
       text-transform: uppercase;
     }
 
+    #team-name {
+      margin-bottom: 14px;
+      font-size: 1.35rem;
+      letter-spacing: 0.04em;
+      text-transform: none;
+    }
+
+    #setup {
+      width: min(28rem, 100%);
+      margin: 0 auto;
+    }
+
     button {
       appearance: none;
       font: inherit;
@@ -165,7 +177,11 @@
     <input id="code" name="code" maxlength="4" autocapitalize="characters" autocomplete="off" enterkeyhint="join" />
     <button id="join" type="submit">Join</button>
   </form>
-  <div id="colors" hidden></div>
+  <div id="setup" hidden>
+    <label for="team-name">Team name</label>
+    <input id="team-name" maxlength="16" autocomplete="nickname" placeholder="Optional" />
+    <div id="colors"></div>
+  </div>
   <div id="buzz-wrap" hidden>
     <button id="buzz" type="button" disabled>Wait</button>
   </div>
@@ -185,16 +201,21 @@
       const CODE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
       const form = document.getElementById("join-form");
       const codeInput = document.getElementById("code");
+      const nameInput = document.getElementById("team-name");
       const roomName = document.getElementById("room-name");
       const statusEl = document.getElementById("status");
+      const setupEl = document.getElementById("setup");
       const colorsEl = document.getElementById("colors");
       const buzzWrap = document.getElementById("buzz-wrap");
       const buzzBtn = document.getElementById("buzz");
       const errorEl = document.getElementById("error");
+      const ANSWER_MS = 5000;
       let socket = null;
       let roomCode = "";
-      let state = { teams: [], taken: [], armed: false, locked: false, winner: null, out: [], you: null };
+      let state = { teams: [], taken: [], names: {}, armed: false, locked: false, winner: null, out: [], you: null };
       let announced = null;
+      let receivedAt = 0;
+      let clockTimer = null;
 
       function colorById(id) {
         for (let i = 0; i < COLORS.length; i++) {
@@ -231,15 +252,23 @@
         if (CODE.test(code)) {
           codeInput.value = code;
         }
+        try {
+          nameInput.value = sessionStorage.getItem("buzz-name") || "";
+        } catch (error) {
+          nameInput.value = "";
+        }
       }
 
-      function remember(code, color) {
+      function remember(code, color, name) {
         try {
           sessionStorage.setItem("buzz-room", code);
           if (color) {
             sessionStorage.setItem("buzz-color", color);
           } else {
             sessionStorage.removeItem("buzz-color");
+          }
+          if (typeof name === "string") {
+            sessionStorage.setItem("buzz-name", name.slice(0, 16));
           }
         } catch (error) {
           // The buzzer still works for this page load.
@@ -252,6 +281,67 @@
         } catch (error) {
           return "";
         }
+      }
+
+      function savedName() {
+        try {
+          return sessionStorage.getItem("buzz-name") || "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function personName(id) {
+        const named = state.names && state.names[id];
+        if (named) {
+          return named;
+        }
+        const color = colorById(id);
+        return color ? color.label : id;
+      }
+
+      function secondsLeft() {
+        if (!state.winner || !state.lockedAt || !state.now) {
+          return null;
+        }
+        const elapsed = (state.now - state.lockedAt) + (Date.now() - receivedAt);
+        return Math.max(0, (ANSWER_MS - elapsed) / 1000);
+      }
+
+      function clockSuffix() {
+        const left = secondsLeft();
+        if (left === null) {
+          return "";
+        }
+        return left > 0 ? " · " + Math.ceil(left) : " · Time";
+      }
+
+      function ensureClock() {
+        if (clockTimer || !state.winner || !state.lockedAt || secondsLeft() <= 0) {
+          return;
+        }
+        clockTimer = setInterval(function () {
+          paintClock();
+          const left = secondsLeft();
+          if (left === null || left <= 0) {
+            clearInterval(clockTimer);
+            clockTimer = null;
+          }
+        }, 200);
+      }
+
+      function paintClock() {
+        const clock = clockSuffix();
+        if (!state.you || !state.locked || !state.winner) {
+          return;
+        }
+        if (state.winner === state.you) {
+          statusEl.textContent = "You buzzed" + clock;
+          buzzBtn.textContent = clock ? clock.replace(" · ", "") : personName(state.you);
+          return;
+        }
+        statusEl.textContent = personName(state.winner) + " buzzed" + clock;
+        buzzBtn.textContent = clock ? clock.replace(" · ", "") : "Locked";
       }
 
       function send(message) {
@@ -268,7 +358,7 @@
         roomName.textContent = roomCode;
         if (!mine) {
           buzzWrap.hidden = true;
-          colorsEl.hidden = false;
+          setupEl.hidden = false;
           statusEl.textContent = state.teams.length ? "Pick your color" : "Waiting for teams";
           colorsEl.innerHTML = "";
           state.teams.forEach(function (id) {
@@ -284,31 +374,35 @@
             button.style.color = inkFor(color.hex);
             button.disabled = state.taken.indexOf(id) !== -1;
             button.addEventListener("click", function () {
-              send({ type: "claim", color: id });
+              const name = nameInput.value;
+              remember(roomCode, "", name);
+              send({ type: "claim", color: id, name: name });
             });
             colorsEl.appendChild(button);
           });
           return;
         }
-        colorsEl.hidden = true;
+        setupEl.hidden = true;
+        colorsEl.innerHTML = "";
         buzzWrap.hidden = false;
         buzzBtn.style.background = mine.hex;
         buzzBtn.style.color = inkFor(mine.hex);
         const out = Array.isArray(state.out) ? state.out : [];
         const lockedOut = out.indexOf(mine.id) !== -1;
         const canBuzz = state.armed && !state.locked && !lockedOut;
+        const clock = clockSuffix();
         buzzBtn.disabled = !canBuzz;
         if (state.armed && lockedOut) {
           statusEl.textContent = "Locked out";
           buzzBtn.textContent = "Out";
         } else if (state.locked && state.winner === mine.id) {
-          statusEl.textContent = "You buzzed";
-          buzzBtn.textContent = mine.label;
+          statusEl.textContent = "You buzzed" + clock;
+          buzzBtn.textContent = clock ? clock.replace(" · ", "") : personName(mine.id);
         } else if (state.locked && winner) {
-          statusEl.textContent = winner.label + " buzzed";
-          buzzBtn.textContent = "Locked";
+          statusEl.textContent = personName(state.winner) + " buzzed" + clock;
+          buzzBtn.textContent = clock ? clock.replace(" · ", "") : "Locked";
         } else if (canBuzz) {
-          statusEl.textContent = mine.label;
+          statusEl.textContent = personName(mine.id);
           buzzBtn.textContent = "Buzz";
         } else {
           statusEl.textContent = "Wait for the answer";
@@ -333,7 +427,7 @@
           showError("");
           const color = savedColor();
           if (color) {
-            send({ type: "claim", color: color });
+            send({ type: "claim", color: color, name: savedName() });
           }
         });
         next.addEventListener("message", function (event) {
@@ -344,18 +438,20 @@
             return;
           }
           if (data.type === "error") {
-            remember(code, "");
+            remember(code, "", nameInput.value);
             showError(data.message);
             return;
           }
           if (data.type !== "state") {
             return;
           }
+          receivedAt = Date.now();
           state = data;
           if (data.you) {
-            remember(code, data.you);
+            remember(code, data.you, nameInput.value || savedName());
           }
           render();
+          ensureClock();
         });
         next.addEventListener("close", function () {
           if (socket !== next) {

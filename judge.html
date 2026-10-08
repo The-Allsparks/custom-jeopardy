@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Judge</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Source+Serif+4:ital,wght@1,600;1,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #ffcc00;
+      --bg: #000814;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: Oswald, Impact, "Arial Narrow", sans-serif;
+    }
+
+    body {
+      padding: max(16px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+    }
+
+    header, main {
+      width: min(40rem, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: 1.4rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    #room-name, #status, #meta, #privacy, #empty, #source {
+      margin: 8px 0 0;
+      text-align: center;
+    }
+
+    #room-name {
+      letter-spacing: 0.28em;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #status {
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    #meta, #privacy {
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    #clock {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(2.4rem, 8vw, 4rem);
+      line-height: 1;
+      text-align: center;
+    }
+
+    #clock[hidden] { display: none; }
+
+    .label {
+      margin: 18px 0 6px;
+      color: var(--gold);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .clue-text {
+      margin: 0;
+      font-family: "Source Serif 4", Georgia, serif;
+      font-style: italic;
+      font-weight: 600;
+      line-height: 1.3;
+      text-align: center;
+      text-wrap: balance;
+    }
+
+    #answer {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+    }
+
+    #response {
+      color: var(--gold);
+      font-size: clamp(1.8rem, 4.4vw, 2.6rem);
+    }
+
+    #source {
+      color: var(--gold);
+    }
+
+    #source a { color: inherit; }
+
+    #empty {
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #actions, #scores {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    button {
+      appearance: none;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      background: #111;
+      color: var(--gold);
+      font: inherit;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    #actions button, .award button {
+      min-height: 48px;
+      padding: 10px 14px;
+    }
+
+    .award {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 9rem;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .award strong {
+      max-width: 10rem;
+      overflow: hidden;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .award b {
+      font-size: 1.4rem;
+    }
+
+    .award div {
+      display: flex;
+      gap: 6px;
+    }
+
+    .award button {
+      min-width: 64px;
+      border-color: #fff;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Judge</h1>
+    <p id="room-name" hidden></p>
+    <p id="status">Connecting</p>
+    <p id="clock" hidden></p>
+  </header>
+  <main>
+    <p id="empty" hidden>Open a clue on the board.</p>
+    <p id="meta" hidden></p>
+    <p id="privacy" hidden></p>
+    <p class="label" id="answer-label" hidden>On the board</p>
+    <p id="answer" class="clue-text" hidden></p>
+    <p class="label" id="response-label" hidden>Response</p>
+    <p id="response" class="clue-text" hidden></p>
+    <p id="source" hidden></p>
+    <div id="actions"></div>
+    <div id="scores"></div>
+  </main>
+  <script>
+    (function () {
+      const COLORS = [
+        { id: "red", label: "Red", hex: "#e11d2e" },
+        { id: "blue", label: "Blue", hex: "#2f6bff" },
+        { id: "green", label: "Green", hex: "#18a558" },
+        { id: "yellow", label: "Yellow", hex: "#ffe14a" },
+        { id: "orange", label: "Orange", hex: "#ff8a00" },
+        { id: "purple", label: "Purple", hex: "#9b4dff" },
+        { id: "pink", label: "Pink", hex: "#ff4f9a" },
+        { id: "white", label: "White", hex: "#f7f7f7" }
+      ];
+      const CODE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
+      const ANSWER_MS = 5000;
+      const params = new URLSearchParams(location.search);
+      const roomCode = (params.get("room") || "").toUpperCase();
+      const token = params.get("token") || "";
+      const roomName = document.getElementById("room-name");
+      const statusEl = document.getElementById("status");
+      const clockEl = document.getElementById("clock");
+      const emptyEl = document.getElementById("empty");
+      const metaEl = document.getElementById("meta");
+      const privacyEl = document.getElementById("privacy");
+      const answerLabel = document.getElementById("answer-label");
+      const answerEl = document.getElementById("answer");
+      const responseLabel = document.getElementById("response-label");
+      const responseEl = document.getElementById("response");
+      const sourceEl = document.getElementById("source");
+      const actionsEl = document.getElementById("actions");
+      const scoresEl = document.getElementById("scores");
+      let socket = null;
+      let state = { teams: [], names: {}, out: [], taken: [] };
+      let receivedAt = 0;
+      let clockTimer = null;
+      let pending = false;
+
+      function colorById(id) {
+        for (let i = 0; i < COLORS.length; i++) {
+          if (COLORS[i].id === id) {
+            return COLORS[i];
+          }
+        }
+        return null;
+      }
+
+      function inkFor(hex) {
+        const rgb = String(hex).replace("#", "");
+        const r = parseInt(rgb.slice(0, 2), 16);
+        const g = parseInt(rgb.slice(2, 4), 16);
+        const b = parseInt(rgb.slice(4, 6), 16);
+        return ((0.299 * r) + (0.587 * g) + (0.114 * b)) / 255 > 0.72 ? "#111" : "#fff";
+      }
+
+      function send(message) {
+        if (socket && socket.readyState === 1) {
+          socket.send(JSON.stringify(message));
+        }
+      }
+
+      function sendAction(action) {
+        if (pending) {
+          return;
+        }
+        pending = true;
+        send(action);
+        render();
+        setTimeout(function () {
+          pending = false;
+          render();
+        }, 800);
+      }
+
+      function secondsLeft() {
+        if (!state.winner || !state.lockedAt || !state.now) {
+          return null;
+        }
+        const elapsed = (state.now - state.lockedAt) + (Date.now() - receivedAt);
+        return Math.max(0, (ANSWER_MS - elapsed) / 1000);
+      }
+
+      function ensureClock() {
+        if (clockTimer || !state.winner || !state.lockedAt || secondsLeft() <= 0) {
+          return;
+        }
+        clockTimer = setInterval(function () {
+          paintClock();
+          const left = secondsLeft();
+          if (left === null || left <= 0) {
+            clearInterval(clockTimer);
+            clockTimer = null;
+          }
+        }, 200);
+      }
+
+      function paintClock() {
+        const left = secondsLeft();
+        if (!state.winner) {
+          clockEl.hidden = true;
+          return;
+        }
+        clockEl.hidden = left === null;
+        clockEl.textContent = left > 0 ? String(Math.ceil(left)) : "Time";
+      }
+
+      function personName(id, fallback) {
+        if (fallback) {
+          return fallback;
+        }
+        if (state.names && state.names[id]) {
+          return state.names[id];
+        }
+        const color = colorById(id);
+        return color ? color.label : id;
+      }
+
+      function clue() {
+        return state.board && state.board.clue ? state.board.clue : null;
+      }
+
+      function scoreRows() {
+        const listed = state.board && Array.isArray(state.board.scores) ? state.board.scores : [];
+        const byId = {};
+        listed.forEach(function (row) {
+          if (row && row.id) {
+            byId[row.id] = row;
+          }
+        });
+        const ids = Array.isArray(state.teams) && state.teams.length ? state.teams : Object.keys(byId);
+        return ids.map(function (id) {
+          const row = byId[id] || {};
+          return {
+            id: id,
+            score: Number.isFinite(Number(row.score)) ? Number(row.score) : 0,
+            name: personName(id, row.name || "")
+          };
+        });
+      }
+
+      function actionButton(label, action) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = pending;
+        button.addEventListener("click", function () {
+          sendAction(action);
+        });
+        return button;
+      }
+
+      function safeUrl(url) {
+        return /^https?:\/\//i.test(url || "") ? url : "";
+      }
+
+      function render() {
+        const current = clue();
+        const winnerName = state.winner ? personName(state.winner, "") : "";
+        roomName.hidden = false;
+        roomName.textContent = roomCode;
+        if (state.winner) {
+          statusEl.textContent = winnerName + " buzzed";
+        } else if (state.armed) {
+          statusEl.textContent = "Buzzers open";
+        } else {
+          statusEl.textContent = current ? "Clue is up" : "Waiting for a clue";
+        }
+        paintClock();
+        const taken = Array.isArray(state.taken) ? state.taken : [];
+        const out = Array.isArray(state.out) ? state.out : [];
+        const bits = [];
+        if (taken.length) {
+          bits.push("In: " + taken.map(function (id) { return personName(id, ""); }).join(", "));
+        }
+        if (out.length) {
+          bits.push("Out: " + out.map(function (id) { return personName(id, ""); }).join(", "));
+        }
+        if (bits.length) {
+          statusEl.textContent += " · " + bits.join(" · ");
+        }
+        emptyEl.hidden = !!current;
+        metaEl.hidden = !current;
+        privacyEl.hidden = !current;
+        answerLabel.hidden = !current;
+        answerEl.hidden = !current;
+        responseLabel.hidden = !current;
+        responseEl.hidden = !current;
+        if (current) {
+          const round = state.board && state.board.round ? state.board.round + " · " : "";
+          metaEl.textContent = round + current.category + " · " + String(current.value).replace(/^\$/, "");
+          privacyEl.textContent = current.step === "question" ? "Response is on the projector" : "Response is only on this screen";
+          answerEl.textContent = current.answer;
+          responseEl.textContent = current.question;
+          const href = safeUrl(current.url);
+          sourceEl.hidden = !current.citation && !href;
+          sourceEl.textContent = "";
+          if (current.citation || href) {
+            if (href) {
+              const link = document.createElement("a");
+              link.href = href;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.textContent = current.citation || "Source";
+              sourceEl.appendChild(link);
+            } else {
+              sourceEl.textContent = current.citation;
+            }
+          }
+        } else {
+          sourceEl.hidden = true;
+        }
+        actionsEl.innerHTML = "";
+        if (current && current.step === "answer") {
+          actionsEl.appendChild(actionButton("Show response", { type: "action", action: "reveal" }));
+          actionsEl.appendChild(actionButton("Put clue back", { type: "action", action: "dismiss" }));
+        } else if (current && current.step === "question") {
+          actionsEl.appendChild(actionButton("Back to board", { type: "action", action: "close" }));
+        }
+        if (state.winner) {
+          actionsEl.appendChild(actionButton("Reopen buzzers", { type: "action", action: "reopen" }));
+        }
+        scoresEl.innerHTML = "";
+        const amount = current ? Number(current.amount) : 0;
+        const scoring = !!(current && current.step === "answer" && amount);
+        scoreRows().forEach(function (row) {
+          const color = colorById(row.id);
+          if (!color) {
+            return;
+          }
+          const ink = inkFor(color.hex);
+          const card = document.createElement("div");
+          card.className = "award";
+          card.style.background = color.hex;
+          card.style.color = ink;
+          const name = document.createElement("strong");
+          name.textContent = row.name;
+          const value = document.createElement("b");
+          value.textContent = String(row.score);
+          card.appendChild(name);
+          card.appendChild(value);
+          if (scoring) {
+            const controls = document.createElement("div");
+            controls.appendChild(scoreButton(ink, "+", amount, row.id));
+            controls.appendChild(scoreButton(ink, "−", -amount, row.id));
+            card.appendChild(controls);
+          }
+          scoresEl.appendChild(card);
+        });
+      }
+
+      function scoreButton(ink, symbol, delta, color) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = symbol;
+        button.style.background = "#111";
+        button.style.color = "#fff";
+        button.style.borderColor = "#fff";
+        button.disabled = pending;
+        button.addEventListener("click", function () {
+          sendAction({ type: "action", action: "award", color: color, delta: delta });
+        });
+        return button;
+      }
+
+      function connect() {
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const next = new WebSocket(protocol + "//" + location.host + "/room?code=" + roomCode + "&role=judge&token=" + encodeURIComponent(token));
+        socket = next;
+        next.addEventListener("open", function () {
+          statusEl.textContent = "Waiting for a clue";
+        });
+        next.addEventListener("message", function (event) {
+          let data;
+          try {
+            data = JSON.parse(event.data);
+          } catch (error) {
+            return;
+          }
+          if (data.type !== "state") {
+            return;
+          }
+          pending = false;
+          receivedAt = Date.now();
+          state = data;
+          render();
+          ensureClock();
+        });
+        next.addEventListener("close", function () {
+          if (socket !== next) {
+            return;
+          }
+          statusEl.textContent = "Reconnecting";
+          setTimeout(connect, 1000);
+        });
+      }
+
+      if (!CODE.test(roomCode) || token.length < 16) {
+        statusEl.textContent = "Open Judge window from the board menu.";
+        return;
+      }
+      connect();
+    })();
+  </script>
+</body>
+</html>

@@ -216,16 +216,28 @@
       left: 50%;
       z-index: 25;
       transform: translateX(-50%);
+      width: max-content;
+      max-width: min(34rem, calc(100vw - 24px));
       min-width: 9rem;
       padding: 10px 18px 8px;
       border: 3px solid #fff;
       border-radius: 4px;
       text-align: center;
       line-height: 1.1;
+      user-select: none;
     }
 
     #buzz-lock[hidden] {
       display: none;
+    }
+
+    #buzz-lock.can-reopen {
+      cursor: pointer;
+    }
+
+    #buzz-lock.can-reopen:hover,
+    #buzz-lock.can-reopen:focus-visible {
+      filter: brightness(1.08);
     }
 
     #buzz-lock strong {
@@ -235,6 +247,19 @@
       text-transform: uppercase;
     }
 
+    #buzz-clock {
+      display: block;
+      margin-top: 2px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    #buzz-clock[hidden] {
+      display: none;
+    }
+
     #buzz-lock span {
       display: block;
       margin-top: 4px;
@@ -242,6 +267,10 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       opacity: 0.8;
+    }
+
+    #buzz-lock span:empty {
+      display: none;
     }
 
     #score-bar {
@@ -257,8 +286,10 @@
 
     .score-team {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 2px;
       min-height: 44px;
       min-width: 4.5rem;
       padding: 6px 14px;
@@ -268,6 +299,23 @@
       font-size: clamp(1.05rem, 2vw, 1.45rem);
       font-weight: 700;
       letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    .score-name {
+      max-width: 7.5rem;
+      overflow: hidden;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .score-team.leader {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
     }
 
     .color-swatch {
@@ -285,6 +333,7 @@
     }
 
     #menu-toggle,
+    #judge-open,
     #sound,
     #music-link,
     #credits-open,
@@ -347,11 +396,20 @@
       display: none;
     }
 
+    #judge-open,
     #sound,
     #music-link,
     #credits-open {
       width: 100%;
       white-space: nowrap;
+    }
+
+    #judge-open[hidden] {
+      display: none;
+    }
+
+    #judge-open {
+      margin-bottom: 8px;
     }
 
     #music-link {
@@ -407,6 +465,8 @@
 
     #menu-toggle:hover,
     #menu-toggle:focus-visible,
+    #judge-open:hover,
+    #judge-open:focus-visible,
     #sound:hover,
     #sound:focus-visible {
       background: var(--gold);
@@ -600,10 +660,85 @@
     #overlay-hint {
       position: absolute;
       bottom: 24px;
+      max-width: 92vw;
       font-size: 0.95rem;
       letter-spacing: 0.16em;
+      text-align: center;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.55);
+    }
+
+    #moment {
+      position: fixed;
+      inset: 0;
+      z-index: 28;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 24px;
+      background: rgba(0, 8, 20, 0.94);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    #moment[hidden] {
+      display: none;
+    }
+
+    #moment-kicker,
+    #moment-hint {
+      margin: 0;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    #moment-hint {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    #moment-title {
+      max-width: 92vw;
+      margin: 0;
+      color: #fff;
+      font-size: clamp(2.6rem, 9vw, 6.4rem);
+      letter-spacing: 0.06em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      text-wrap: balance;
+      text-shadow: 0 2px 0 #7a5c00;
+    }
+
+    #moment-standings {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: min(28rem, 92vw);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    #moment-standings[hidden] {
+      display: none;
+    }
+
+    #moment-standings li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: clamp(1.15rem, 3vw, 1.7rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    #moment-standings li.leader {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
     }
 
     #overlay.has-awards {
@@ -640,11 +775,15 @@
     }
 
     .award-label {
+      max-width: 8rem;
+      overflow: hidden;
       font-size: 0.78rem;
       letter-spacing: 0.12em;
+      text-overflow: ellipsis;
       text-transform: uppercase;
       color: #fff;
       text-shadow: 0 1px 2px #000;
+      white-space: nowrap;
     }
 
     .award-team button {
@@ -823,6 +962,7 @@
       <span aria-hidden="true"></span>
     </button>
     <div id="menu-panel" hidden>
+      <button id="judge-open" type="button" hidden>Judge window</button>
       <button id="sound" type="button" aria-pressed="true">Music on</button>
       <a id="music-link" href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer" hidden>Think music</a>
       <div class="menu-section">
@@ -838,7 +978,12 @@
       </div>
     </div>
   </div>
-    <div id="buzz-lock" hidden><strong></strong><span>Console: resetBuzz()</span></div>
+    <div id="buzz-lock" hidden role="status">
+      <strong></strong>
+      <b id="buzz-clock" hidden></b>
+      <span data-buzz-note></span>
+      <span id="buzz-roster"></span>
+    </div>
   </header>
   <div id="qr-zoom" hidden>
     <img id="qr-zoom-img" alt="" />
@@ -893,6 +1038,12 @@
     <div id="award-bar" hidden></div>
     <div id="overlay-hint">Click to continue</div>
   </div>
+  <div id="moment" hidden>
+    <p id="moment-kicker"></p>
+    <h2 id="moment-title"></h2>
+    <ol id="moment-standings" hidden></ol>
+    <p id="moment-hint"></p>
+  </div>
 
   <script src="board.txt"></script>
   <script src="qrcode.js"></script>
@@ -917,6 +1068,13 @@
       const removeTeamsEl = document.getElementById("remove-teams");
       const scoreBar = document.getElementById("score-bar");
       const awardBar = document.getElementById("award-bar");
+      const overlayHint = document.getElementById("overlay-hint");
+      const judgeOpen = document.getElementById("judge-open");
+      const momentEl = document.getElementById("moment");
+      const momentKicker = document.getElementById("moment-kicker");
+      const momentTitle = document.getElementById("moment-title");
+      const momentStandings = document.getElementById("moment-standings");
+      const momentHint = document.getElementById("moment-hint");
 
       if (typeof BOARD !== "string") {
         showError("Could not load board.txt. Keep index.html and board.txt in the same folder, then refresh.");
@@ -956,6 +1114,10 @@
       let roomCode = "";
       let roomToken = "";
       let buzzWinner = null;
+      let roomState = null;
+      let clockTimer = null;
+      let lastActionId = "";
+      const ANSWER_MS = 5000;
       const ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       const musicLink = document.getElementById("music-link");
       const credits = document.getElementById("credits");
@@ -980,7 +1142,6 @@
       renderTeamMenu();
       renderAll();
       connectRoom();
-      console.log("[Buzz] resetBuzz() clears the lock.");
       if (usesFirstMaterials(pool)) {
         Array.prototype.forEach.call(document.querySelectorAll(".first-credit"), function (item) {
           item.hidden = false;
@@ -1003,6 +1164,14 @@
       });
 
       soundBtn.addEventListener("click", toggleSound);
+      judgeOpen.addEventListener("click", function () {
+        if (!roomCode || !roomToken) {
+          return;
+        }
+        const url = new URL("/judge?room=" + roomCode + "&token=" + encodeURIComponent(roomToken), location.href);
+        window.open(url.href, "jeopardy-judge");
+        closeMenu();
+      });
       creditsOpen.addEventListener("click", function () {
         closeMenu();
         openCredits();
@@ -1048,6 +1217,10 @@
         advanceOverlay();
       });
 
+      momentEl.addEventListener("click", function () {
+        hideMoment();
+      });
+
       document.addEventListener("keydown", function (event) {
         const qrZoom = document.getElementById("qr-zoom");
         if (!qrZoom.hidden) {
@@ -1064,6 +1237,11 @@
           }
           return;
         }
+        if (!momentEl.hidden && (event.key === "Escape" || event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          hideMoment();
+          return;
+        }
         if (event.key === "m" || event.key === "M") {
           if (event.repeat) {
             return;
@@ -1077,11 +1255,21 @@
           closeMenu();
           return;
         }
+        if ((event.key === "r" || event.key === "R") && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && roomState && roomState.winner) {
+          event.preventDefault();
+          window.resetBuzz();
+          return;
+        }
         if (!overlayEl.classList.contains("open")) {
           return;
         }
         if ((event.key === "Enter" || event.key === " ") &&
             (menu.contains(event.target) || awardBar.contains(event.target) || event.target === overlayLink)) {
+          return;
+        }
+        if (event.key === "Escape" && active && active.step === "answer") {
+          event.preventDefault();
+          dismissClue();
           return;
         }
         if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
@@ -1295,9 +1483,11 @@
         saveRound();
         stopThinkMusic();
         sendRoom({ type: "disarm" });
+        hideMoment();
         overlayEl.classList.remove("open", "question");
         renderAwardBar();
         renderAll();
+        publishBoard();
       }
 
       function loadOrDeal() {
@@ -1368,8 +1558,9 @@
             return;
           }
           const score = Number(item.score);
+          const name = typeof item.name === "string" ? item.name.replace(/[\u0000-\u001f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 16) : "";
           seen[item.id] = true;
-          loaded.push({ id: item.id, score: Number.isFinite(score) ? score : 0 });
+          loaded.push({ id: item.id, score: Number.isFinite(score) ? score : 0, name: name });
         });
         return loaded;
       }
@@ -1382,12 +1573,13 @@
         if (!colorById(id) || teamById(id)) {
           return;
         }
-        teams.push({ id: id, score: 0 });
+        teams.push({ id: id, score: 0, name: "" });
         saveTeams();
         renderTeamMenu();
         renderScoreBar();
         renderAwardBar();
         sendTeams();
+        publishBoard();
       }
 
       function removeTeam(id) {
@@ -1400,6 +1592,7 @@
         renderAll();
         renderAwardBar();
         sendTeams();
+        publishBoard();
       }
 
       function adjustScore(id, delta) {
@@ -1413,6 +1606,7 @@
           recordAward(active.id, id, delta);
         }
         renderScoreBar(id);
+        publishBoard();
       }
 
       function loadAwards() {
@@ -1490,6 +1684,7 @@
         }
         saveAwards();
         renderAll();
+        publishBoard();
       }
 
       function clueAmount(clue) {
@@ -1546,6 +1741,41 @@
         removeSection.hidden = teams.length === 0;
       }
 
+      function teamLabel(team) {
+        if (team && team.name) {
+          return team.name;
+        }
+        const color = team ? colorById(team.id) : null;
+        return color ? color.label : (team ? team.id : "");
+      }
+
+      function leadingTeams() {
+        if (!teams.length) {
+          return [];
+        }
+        let best = teams[0].score;
+        teams.forEach(function (team) {
+          if (team.score > best) {
+            best = team.score;
+          }
+        });
+        return teams.filter(function (team) {
+          return team.score === best;
+        });
+      }
+
+      function leaderIds() {
+        const leaders = leadingTeams();
+        if (!leaders.length || leaders.length === teams.length) {
+          return {};
+        }
+        const ids = {};
+        leaders.forEach(function (team) {
+          ids[team.id] = true;
+        });
+        return ids;
+      }
+
       function renderScoreBar(bumpedId) {
         scoreBar.innerHTML = "";
         scoreBar.hidden = teams.length < 2;
@@ -1553,14 +1783,22 @@
         if (scoreBar.hidden) {
           return;
         }
+        const leaders = leaderIds();
         teams.forEach(function (team) {
           const color = colorById(team.id);
           const item = document.createElement("div");
-          item.className = "score-team" + (team.id === bumpedId ? " bump" : "");
+          item.className = "score-team" + (team.id === bumpedId ? " bump" : "") + (leaders[team.id] ? " leader" : "");
           item.style.background = color.hex;
           item.style.color = inkFor(color.hex);
-          item.setAttribute("aria-label", color.label + ", " + formatMoney(team.score));
-          item.textContent = formatMoney(team.score);
+          item.title = teamLabel(team);
+          item.setAttribute("aria-label", teamLabel(team) + ", " + formatMoney(team.score));
+          const name = document.createElement("span");
+          name.className = "score-name";
+          name.textContent = teamLabel(team);
+          const value = document.createElement("span");
+          value.textContent = formatMoney(team.score);
+          item.appendChild(name);
+          item.appendChild(value);
           scoreBar.appendChild(item);
         });
       }
@@ -1581,11 +1819,11 @@
           group.className = "award-team";
           const caption = document.createElement("div");
           caption.className = "award-label";
-          caption.textContent = color.label;
+          caption.textContent = teamLabel(team);
           const actions = document.createElement("div");
           actions.className = "award-actions";
-          actions.appendChild(awardButton(color, ink, "+", value, "Add " + formatMoney(value) + " for " + color.label));
-          actions.appendChild(awardButton(color, ink, "−", -value, "Subtract " + formatMoney(value) + " for " + color.label));
+          actions.appendChild(awardButton(color, ink, "+", value, "Add " + formatMoney(value) + " for " + teamLabel(team)));
+          actions.appendChild(awardButton(color, ink, "−", -value, "Subtract " + formatMoney(value) + " for " + teamLabel(team)));
           group.appendChild(caption);
           group.appendChild(actions);
           awardBar.appendChild(group);
@@ -1774,9 +2012,25 @@
         hideSource();
         clearQuestionFit();
         console.log("[Judge] " + clueMeta(category, clue) + "\n" + clue.question);
+        overlayHint.textContent = "Click to continue. Esc puts it back.";
         renderAwardBar();
         startThinkMusic();
         sendRoom({ type: "arm", fresh: true });
+        publishBoard();
+      }
+
+      function dismissClue() {
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        stopThinkMusic();
+        sendRoom({ type: "disarm" });
+        hideSource();
+        clearQuestionFit();
+        active = null;
+        overlayEl.classList.remove("open", "question");
+        renderAwardBar();
+        publishBoard();
       }
 
       function advanceOverlay() {
@@ -1791,9 +2045,11 @@
           overlayLabel.textContent = "Question";
           overlayPrompt.textContent = active.clue.answer;
           overlayText.textContent = active.clue.question;
+          overlayHint.textContent = "Click to continue";
           showSource(active.clue);
           fitQuestionText();
           renderAwardBar();
+          publishBoard();
           return;
         }
         hideSource();
@@ -1807,8 +2063,67 @@
         if (!wasComplete && isRoundComplete(roundIndex) && canOpenRound(roundIndex + 1)) {
           roundIndex += 1;
           saveRound();
+          renderAll();
+          showRoundCard();
+          publishBoard();
+          return;
         }
         renderAll();
+        if (!wasComplete && isRoundComplete(roundIndex)) {
+          showFinalCard();
+        }
+        publishBoard();
+      }
+
+      function showRoundCard() {
+        momentKicker.textContent = "Next round";
+        momentTitle.textContent = game.rounds[roundIndex].name;
+        momentStandings.hidden = true;
+        momentStandings.innerHTML = "";
+        momentHint.textContent = "Click to start";
+        momentEl.hidden = false;
+      }
+
+      function showFinalCard() {
+        const ranked = teams.slice().sort(function (a, b) {
+          return b.score - a.score;
+        });
+        const leaders = leadingTeams();
+        momentKicker.textContent = "Final scores";
+        if (!ranked.length) {
+          momentTitle.textContent = "That's the board";
+        } else if (leaders.length === 1) {
+          momentTitle.textContent = teamLabel(leaders[0]);
+        } else {
+          momentTitle.textContent = "Tie";
+        }
+        momentStandings.innerHTML = "";
+        momentStandings.hidden = ranked.length === 0;
+        ranked.forEach(function (team) {
+          const color = colorById(team.id);
+          const row = document.createElement("li");
+          const ahead = leaders.some(function (leader) {
+            return leader.id === team.id;
+          });
+          if (ahead) {
+            row.className = "leader";
+          }
+          row.style.background = color.hex;
+          row.style.color = inkFor(color.hex);
+          const name = document.createElement("span");
+          name.textContent = teamLabel(team);
+          const value = document.createElement("span");
+          value.textContent = formatMoney(team.score);
+          row.appendChild(name);
+          row.appendChild(value);
+          momentStandings.appendChild(row);
+        });
+        momentHint.textContent = "Click to close";
+        momentEl.hidden = false;
+      }
+
+      function hideMoment() {
+        momentEl.hidden = true;
       }
 
       function showSource(clue) {
@@ -2117,11 +2432,13 @@
         qrButton.setAttribute("aria-label", "Buzzers, room " + roomCode + ". Enlarge the QR code.");
         renderRoomQr();
         syncRoomVisibility();
+        judgeOpen.hidden = false;
         const protocol = location.protocol === "https:" ? "wss:" : "ws:";
         const socket = new WebSocket(protocol + "//" + location.host + "/room?code=" + roomCode + "&role=host&token=" + encodeURIComponent(roomToken));
         roomSocket = socket;
         socket.addEventListener("open", function () {
           sendTeams();
+          publishBoard();
           if (active && active.step === "answer") {
             sendRoom({ type: "arm" });
           }
@@ -2133,8 +2450,15 @@
           } catch (error) {
             return;
           }
+          if (data.type === "action") {
+            applyAction(data);
+            return;
+          }
           if (data.type === "state") {
-            renderBuzzLock(data);
+            roomState = data;
+            roomState.receivedAt = Date.now();
+            applyRoomNames(data.names);
+            renderBuzzLock();
           }
         });
         socket.addEventListener("close", function () {
@@ -2209,41 +2533,202 @@
         });
       }
 
-      function renderBuzzLock(state) {
+      function publishBoard() {
+        const scores = teams.map(function (team) {
+          return { id: team.id, score: team.score, name: team.name || "" };
+        });
+        let clue = null;
+        if (active) {
+          clue = {
+            id: active.id,
+            category: active.category.name,
+            value: String(active.clue.value),
+            answer: active.clue.answer,
+            question: active.clue.question,
+            citation: active.clue.citation || "",
+            url: active.clue.url || "",
+            step: active.step,
+            amount: clueAmount(active.clue)
+          };
+        }
+        sendRoom({
+          type: "board",
+          clue: clue,
+          scores: scores,
+          round: game.rounds[roundIndex] ? game.rounds[roundIndex].name : ""
+        });
+      }
+
+      function applyAction(data) {
+        if (!data || data.type !== "action" || typeof data.id !== "string" || !data.id || data.id === lastActionId) {
+          return;
+        }
+        lastActionId = data.id;
+        if (data.action === "award") {
+          if (!active || active.step !== "answer") {
+            return;
+          }
+          const amount = clueAmount(active.clue);
+          const delta = Number(data.delta);
+          if (!teamById(data.color) || !amount || (delta !== amount && delta !== -amount)) {
+            return;
+          }
+          adjustScore(data.color, delta);
+          if (delta < 0) {
+            sendRoom({ type: "miss", color: data.color });
+          } else if (data.color === buzzWinner) {
+            window.resetBuzz();
+          }
+          if (delta > 0) {
+            advanceOverlay();
+          }
+          return;
+        }
+        if (data.action === "reveal" && active && active.step === "answer") {
+          advanceOverlay();
+          return;
+        }
+        if (data.action === "close" && active && active.step === "question") {
+          advanceOverlay();
+          return;
+        }
+        if (data.action === "dismiss") {
+          dismissClue();
+          return;
+        }
+        if (data.action === "reopen") {
+          window.resetBuzz();
+        }
+      }
+
+      function applyRoomNames(names) {
+        if (!names || typeof names !== "object" || !roomState) {
+          return;
+        }
+        const taken = Array.isArray(roomState.taken) ? roomState.taken : [];
+        let changed = false;
+        teams.forEach(function (team) {
+          const next = typeof names[team.id] === "string" ? names[team.id] : "";
+          const joined = taken.indexOf(team.id) !== -1;
+          if (next && next !== (team.name || "")) {
+            team.name = next;
+            changed = true;
+          } else if (joined && !next && team.name) {
+            team.name = "";
+            changed = true;
+          }
+        });
+        if (!changed) {
+          return;
+        }
+        saveTeams();
+        renderScoreBar();
+        const labels = awardBar.querySelectorAll(".award-label");
+        for (let i = 0; i < teams.length && i < labels.length; i++) {
+          labels[i].textContent = teamLabel(teams[i]);
+        }
+        publishBoard();
+      }
+
+      function displayColor(id) {
+        const named = roomState && roomState.names && roomState.names[id];
+        if (named) {
+          return named;
+        }
+        const team = teamById(id);
+        if (team && team.name) {
+          return team.name;
+        }
+        const color = colorById(id);
+        return color ? color.label : id;
+      }
+
+      function secondsLeft() {
+        if (!roomState || !roomState.winner || !roomState.lockedAt || !roomState.now) {
+          return null;
+        }
+        const elapsed = (roomState.now - roomState.lockedAt) + (Date.now() - roomState.receivedAt);
+        return Math.max(0, (ANSWER_MS - elapsed) / 1000);
+      }
+
+      function ensureClock() {
+        if (clockTimer || !roomState || !roomState.winner || !roomState.lockedAt) {
+          return;
+        }
+        if (secondsLeft() <= 0) {
+          return;
+        }
+        clockTimer = setInterval(function () {
+          if (!roomState || !roomState.winner || !roomState.lockedAt) {
+            clearInterval(clockTimer);
+            clockTimer = null;
+            return;
+          }
+          renderBuzzLock();
+          if (secondsLeft() <= 0) {
+            clearInterval(clockTimer);
+            clockTimer = null;
+          }
+        }, 200);
+      }
+
+      function renderBuzzLock() {
+        const state = roomState;
         const banner = document.getElementById("buzz-lock");
-        const label = banner.querySelector("strong");
-        const note = banner.querySelector("span");
+        const clock = document.getElementById("buzz-clock");
+        const title = banner.querySelector("strong");
+        const note = banner.querySelector("[data-buzz-note]");
+        const roster = document.getElementById("buzz-roster");
+        if (!state) {
+          banner.hidden = true;
+          return;
+        }
+        const taken = Array.isArray(state.taken) ? state.taken : [];
         const out = Array.isArray(state.out) ? state.out : [];
         if (state.winner !== buzzWinner) {
           buzzWinner = state.winner;
           if (state.winner) {
-            const color = colorById(state.winner);
-            console.log("[Buzz] " + (color ? color.label : state.winner));
+            console.log("[Buzz] " + displayColor(state.winner));
           }
         }
+        if (!state.winner && !state.armed && !taken.length && !out.length) {
+          banner.hidden = true;
+          return;
+        }
+        banner.hidden = false;
+        banner.classList.toggle("can-reopen", !!state.winner);
+        const parts = [];
+        if (taken.length) {
+          parts.push("In: " + taken.map(displayColor).join(", "));
+        }
+        if (out.length) {
+          parts.push("Out: " + out.map(displayColor).join(", "));
+        }
+        roster.textContent = parts.join(" · ");
         if (state.winner) {
           const color = colorById(state.winner);
-          banner.hidden = false;
-          label.textContent = (color ? color.label : state.winner) + " buzzed";
-          note.textContent = "Console: resetBuzz()";
           banner.style.background = color ? color.hex : "#111";
           banner.style.color = color ? inkFor(color.hex) : "#fff";
+          title.textContent = displayColor(state.winner) + " buzzed";
+          const left = secondsLeft();
+          clock.hidden = left === null;
+          clock.textContent = left > 0 ? String(Math.ceil(left)) : "Time";
+          note.textContent = "Click or press R to reopen";
+          ensureClock();
           return;
         }
-        if (state.armed && out.length) {
-          const names = out.map(function (id) {
-            const color = colorById(id);
-            return color ? color.label : id;
-          });
-          banner.hidden = false;
-          label.textContent = "Buzzers open";
-          note.textContent = "Out: " + names.join(", ");
-          banner.style.background = "#111";
-          banner.style.color = "#ffcc00";
-          return;
-        }
-        banner.hidden = true;
+        clock.hidden = true;
+        banner.style.background = "#111";
+        banner.style.color = "#ffcc00";
+        title.textContent = state.armed ? "Buzzers open" : "Buzzers";
+        note.textContent = state.armed && !taken.length ? "No buzzers joined yet" : "";
       }
+
+      document.getElementById("buzz-lock").addEventListener("click", function () {
+        if (roomState && roomState.winner) {
+          window.resetBuzz();
+        }
+      });
 
       window.resetBuzz = function () {
         sendRoom({ type: "reset" });

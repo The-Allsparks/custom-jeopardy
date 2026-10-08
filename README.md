@@ -33,11 +33,13 @@ Leave off the last line to stay on the classroom board.
 3. Click a value. The answer appears, and players respond with a question.
 4. Click the screen, or press Enter or Space, to show the question.
 5. Click again to return to the board. That clue stays dark.
-6. When every Jeopardy clue has been played, Double Jeopardy opens on its own.
+6. When every Jeopardy clue has been played, a Double Jeopardy card appears. Click it to deal the next board. After the last clue, the final scores fill the screen.
+
+On the answer screen, Escape puts that clue back on the board. Enter, Space, or a click still moves ahead.
+
+The menu's Judge window shows the response on your laptop while the projector stays on the board. The response is also printed in the console on a line that starts with `[Judge]`.
 
 Refreshing the page keeps the current game. Closing the tab and opening the page again deals a new board. Click the title and confirm to deal a new game now.
-
-While the answer is on screen, the question is also printed in the browser console. Press F12, open Console, and read the line that starts with `[Judge]`.
 
 ## Keep score
 
@@ -48,7 +50,17 @@ Open the menu at the top right. Credits introduces The Allsparks, FTC team 36117
 - Scores show in the header.
 - On a clue, **+** adds that clue's value and moves ahead one step. **−** subtracts that value and stays on the screen.
 
-Teams stay in this browser. A new deal sets every score back to zero and keeps the teams.
+Teams stay in this browser. A new deal sets every score back to zero and keeps the teams. The leader's score is outlined in gold.
+
+## Host a room
+
+Buzzers and the judge window run on the hosted board. A copy opened from a folder still keeps score on the projector.
+
+Add at least two teams. A buzzer QR code appears. Each phone joins that room, types a short team name, and picks a color. The name shows on the score bar and on the buzz banner.
+
+The first buzz locks the other phones and starts a five-second clock. The clock does not change the score. Click the banner, or press R, to reopen the buzzers. A wrong answer locks that team out until the next clue. The banner lists who has joined and who is already out.
+
+Judge window, in the menu, opens the response and the score buttons beside the projector.
 
 ## Music
 
