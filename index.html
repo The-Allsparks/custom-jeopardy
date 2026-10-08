@@ -1604,6 +1604,7 @@
         renderAwardBar();
         sendTeams();
         publishBoard();
+        renderBuzzLock();
       }
 
       function removeTeam(id) {
@@ -1617,6 +1618,7 @@
         renderAwardBar();
         sendTeams();
         publishBoard();
+        renderBuzzLock();
       }
 
       function adjustScore(id, delta) {
@@ -2712,7 +2714,7 @@
         const note = banner.querySelector("[data-buzz-note]");
         const roster = document.getElementById("buzz-roster");
         const buzzQr = document.getElementById("buzz-qr");
-        if (!state) {
+        if (!state || !teams.length) {
           banner.hidden = true;
           buzzQr.hidden = true;
           return;
