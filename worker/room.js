@@ -144,7 +144,11 @@ export class BuzzRoom extends DurableObject {
       token: token,
       color: null
     });
-    server.send(JSON.stringify(this.view(room, null, role)));
+    if (role === "judge") {
+      this.broadcast(room);
+    } else {
+      server.send(JSON.stringify(this.view(room, null, role)));
+    }
     return new Response(null, { status: 101, webSocket: client });
   }
 
@@ -203,6 +207,11 @@ export class BuzzRoom extends DurableObject {
 
   async webSocketClose(ws) {
     const attachment = ws.deserializeAttachment() || {};
+    if (attachment.role === "judge") {
+      const room = await this.load();
+      this.broadcast(room, attachment.id);
+      return;
+    }
     if (!attachment.color) {
       return;
     }
@@ -371,18 +380,28 @@ export class BuzzRoom extends DurableObject {
     });
   }
 
-  broadcast(room) {
+  broadcast(room, closingId) {
     this.ctx.getWebSockets().forEach((ws) => {
       const attachment = ws.deserializeAttachment() || {};
+      if (closingId && attachment.id === closingId) {
+        return;
+      }
       try {
-        ws.send(JSON.stringify(this.view(room, attachment.color || null, attachment.role || "player")));
+        ws.send(JSON.stringify(this.view(room, attachment.color || null, attachment.role || "player", closingId)));
       } catch (error) {
         // A closing socket can reject the send. The next snapshot covers the rest.
       }
     });
   }
 
-  view(room, you, role) {
+  judgeOpen(closingId) {
+    return this.ctx.getWebSockets().some(function (ws) {
+      const attachment = ws.deserializeAttachment() || {};
+      return attachment.role === "judge" && attachment.id !== closingId;
+    });
+  }
+
+  view(room, you, role, closingId) {
     const payload = {
       type: "state",
       teams: room.teams,
@@ -398,6 +417,9 @@ export class BuzzRoom extends DurableObject {
     };
     if (role === "host" || role === "judge") {
       payload.board = room.board || null;
+    }
+    if (role === "host") {
+      payload.judge = this.judgeOpen(closingId);
     }
     return payload;
   }

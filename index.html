@@ -1805,7 +1805,7 @@
 
       function renderAwardBar() {
         awardBar.innerHTML = "";
-        const show = !!(active && active.step === "answer" && teams.length >= 2);
+        const show = !!(active && active.step === "answer" && teams.length >= 2 && !(roomState && roomState.judge));
         awardBar.hidden = !show;
         overlayEl.classList.toggle("has-awards", show);
         if (!show) {
@@ -2459,6 +2459,7 @@
             roomState.receivedAt = Date.now();
             applyRoomNames(data.names);
             renderBuzzLock();
+            renderAwardBar();
           }
         });
         socket.addEventListener("close", function () {

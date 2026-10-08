@@ -60,7 +60,7 @@ Add at least two teams. A buzzer QR code appears. Each phone joins that room, ty
 
 The first buzz locks the other phones and starts a five-second clock. The clock does not change the score. Click the banner, or press R, to reopen the buzzers. A wrong answer locks that team out until the next clue. The banner lists who has joined and who is already out.
 
-Judge window, in the menu, opens the response and the score buttons beside the projector.
+Judge window, in the menu, opens the response and the score buttons beside the projector. While that window is open, the board hides the + and − buttons.
 
 ## Music
 
