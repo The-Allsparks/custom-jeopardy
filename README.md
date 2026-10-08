@@ -58,7 +58,7 @@ Buzzers and the judge window run on the hosted board. A copy opened from a folde
 
 Add at least two teams. A buzzer QR code appears. Each phone joins that room, types a short team name, and picks a color. The name shows on the score bar and on the buzz banner.
 
-The first buzz locks the other phones and starts a five-second clock. The clock does not change the score. Click the banner, or press R, to reopen the buzzers. A wrong answer locks that team out until the next clue. The banner lists who has joined and who is already out.
+The first buzz locks the other phones and starts a five-second clock. The clock does not change the score. Click the banner, or press R, to reopen the buzzers. While a team still needs a phone, that banner shows the buzzer QR code. A wrong answer locks that team out until the next clue. The banner lists who has joined and who is already out.
 
 Judge window, in the menu, opens the response and the score buttons beside the projector. While that window is open, the board hides the + and − buttons.
 

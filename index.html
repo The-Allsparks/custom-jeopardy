@@ -273,6 +273,27 @@
       display: none;
     }
 
+    #buzz-qr {
+      display: block;
+      margin: 10px auto 2px;
+      padding: 8px;
+      border: 0;
+      border-radius: 4px;
+      background: #fff;
+      line-height: 0;
+      cursor: pointer;
+    }
+
+    #buzz-qr[hidden] {
+      display: none;
+    }
+
+    #buzz-qr img {
+      display: block;
+      width: min(46vw, 240px);
+      height: auto;
+    }
+
     #score-bar {
       display: flex;
       flex-wrap: wrap;
@@ -980,6 +1001,9 @@
   </div>
     <div id="buzz-lock" hidden role="status">
       <strong></strong>
+      <button id="buzz-qr" type="button" hidden title="Enlarge the buzzer QR code">
+        <img id="buzz-qr-img" alt="" width="240" height="240" />
+      </button>
       <b id="buzz-clock" hidden></b>
       <span data-buzz-note></span>
       <span id="buzz-roster"></span>
@@ -2505,10 +2529,17 @@
         qr.make();
         const image = qr.createDataURL(8, 2);
         document.getElementById("room-qr-img").src = image;
+        document.getElementById("buzz-qr-img").src = image;
+        document.getElementById("buzz-qr-img").alt = "QR code for " + buzzerUrl();
         document.getElementById("qr-zoom-img").src = image;
         document.getElementById("qr-zoom-img").alt = "QR code for " + buzzerUrl();
         document.getElementById("qr-zoom-code").textContent = roomCode;
       }
+
+      document.getElementById("buzz-qr").addEventListener("click", function (event) {
+        event.stopPropagation();
+        document.getElementById("qr-zoom").hidden = false;
+      });
 
       document.getElementById("room-qr").addEventListener("click", function (event) {
         event.stopPropagation();
@@ -2680,12 +2711,17 @@
         const title = banner.querySelector("strong");
         const note = banner.querySelector("[data-buzz-note]");
         const roster = document.getElementById("buzz-roster");
+        const buzzQr = document.getElementById("buzz-qr");
         if (!state) {
           banner.hidden = true;
+          buzzQr.hidden = true;
           return;
         }
         const taken = Array.isArray(state.taken) ? state.taken : [];
         const out = Array.isArray(state.out) ? state.out : [];
+        const waitingForTeams = teams.some(function (team) {
+          return taken.indexOf(team.id) === -1;
+        });
         if (state.winner !== buzzWinner) {
           buzzWinner = state.winner;
           if (state.winner) {
@@ -2694,9 +2730,11 @@
         }
         if (!state.winner && !state.armed && !taken.length && !out.length) {
           banner.hidden = true;
+          buzzQr.hidden = true;
           return;
         }
         banner.hidden = false;
+        buzzQr.hidden = !!state.winner || !waitingForTeams;
         banner.classList.toggle("can-reopen", !!state.winner);
         const parts = [];
         if (taken.length) {
