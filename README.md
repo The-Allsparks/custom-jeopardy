@@ -87,7 +87,7 @@ Another answer | Another question
 - Use at least 12 categories so both rounds can fill 6 columns. With fewer categories, Double Jeopardy uses whatever is left. With 6 or fewer, only Jeopardy is dealt.
 - Lines starting with `#` are comments.
 - A dollar amount at the start of a line is ignored. `200 | answer | question` is read as `answer | question`. The board assigns the dollar values from where the clue sits in the list.
-- An optional source is shown on the question page: `answer | question | citation | https://link`
+- An optional source is shown on the question page and on each buzzer: `answer | question | citation | https://link`
 
 Save the file, then refresh Chrome. Changing `board.txt` starts a fresh deal.
 

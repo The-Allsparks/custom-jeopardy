@@ -72,6 +72,19 @@ function cleanClue(value) {
   };
 }
 
+function publicSource(board) {
+  const clue = board && board.clue;
+  if (!clue) {
+    return null;
+  }
+  const citation = clip(clue.citation, 200);
+  const url = /^https?:\/\//i.test(clue.url || "") ? clip(clue.url, 400) : "";
+  if (!citation && !url) {
+    return null;
+  }
+  return { citation: citation, url: url };
+}
+
 function cleanScores(value) {
   const list = [];
   if (!Array.isArray(value)) {
@@ -413,7 +426,8 @@ export class BuzzRoom extends DurableObject {
       lockedAt: room.lockedAt || null,
       now: Date.now(),
       out: room.out,
-      you: you
+      you: you,
+      source: publicSource(room.board)
     };
     if (role === "host" || role === "judge") {
       payload.board = room.board || null;
