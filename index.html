@@ -196,18 +196,43 @@
       display: none;
     }
 
-    #qr-zoom img {
+    #qr-zoom img,
+    #room-preview img {
       width: min(72vw, 420px);
       height: auto;
       padding: 16px;
       background: #fff;
     }
 
-    #qr-zoom p {
+    #qr-zoom p,
+    #room-preview p {
       margin: 0;
       color: var(--gold);
       font-size: clamp(2rem, 6vw, 3.2rem);
       letter-spacing: 0.2em;
+    }
+
+    #room-preview {
+      position: fixed;
+      inset: 0;
+      z-index: 22;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.84);
+      pointer-events: none;
+    }
+
+    #room:hover #room-preview,
+    #room:focus-within #room-preview {
+      display: flex;
+    }
+
+    body:has(#qr-zoom:not([hidden])) #room-preview {
+      display: none;
     }
 
     #buzz-lock {
@@ -974,6 +999,10 @@
           <span id="room-code"></span>
           <img id="room-qr-img" alt="" width="64" height="64" />
         </button>
+        <div id="room-preview" aria-hidden="true">
+          <img id="room-preview-img" alt="" />
+          <p id="room-preview-code"></p>
+        </div>
       </div>
     </div>
     <div id="menu">
@@ -2536,6 +2565,8 @@
         document.getElementById("qr-zoom-img").src = image;
         document.getElementById("qr-zoom-img").alt = "QR code for " + buzzerUrl();
         document.getElementById("qr-zoom-code").textContent = roomCode;
+        document.getElementById("room-preview-img").src = image;
+        document.getElementById("room-preview-code").textContent = roomCode;
       }
 
       document.getElementById("buzz-qr").addEventListener("click", function (event) {
