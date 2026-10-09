@@ -1,0 +1,3 @@
+# board.txt is loaded with a script tag. Browsers will not run a text/plain response.
+/board.txt
+  Content-Type: text/javascript; charset=utf-8

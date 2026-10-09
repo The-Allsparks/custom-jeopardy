@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Jeopardy</title>
+  <title>Quizgrid</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Source+Serif+4:ital,wght@1,600;1,700&display=swap" rel="stylesheet" />
@@ -17,6 +18,11 @@
       --gold-dim: #c9a000;
       --played: #03061f;
       --text: #ffffff;
+      --qr-img: 64px;
+      --qr-box: calc(var(--qr-img) + 10px);
+      --room-label: 0.72rem;
+      --room-gap: 2px;
+      --qr-stack: calc(var(--room-label) + var(--room-gap) + var(--qr-box));
     }
 
     * {
@@ -41,17 +47,20 @@
 
     header {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       gap: 16px;
       flex-shrink: 0;
       flex-wrap: wrap;
-      padding-right: 64px;
     }
 
     h1 {
+      display: flex;
+      align-items: center;
+      height: var(--qr-stack);
       margin: 0;
-      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      font-size: min(var(--qr-stack), 8vw);
+      line-height: 1;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--gold);
@@ -82,12 +91,239 @@
       outline-offset: 4px;
     }
 
+    #header-tools {
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    #room {
+      display: grid;
+      justify-items: center;
+      row-gap: var(--room-gap);
+    }
+
+    #room[hidden] {
+      display: none;
+    }
+
+    #room-qr-label {
+      color: #fff;
+      font-size: var(--room-label);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    #room-qr {
+      position: relative;
+      grid-area: 2 / 1;
+      display: grid;
+      place-items: center;
+      appearance: none;
+      padding: 3px;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      background: #fff;
+      line-height: 0;
+      cursor: pointer;
+    }
+
+    #room-qr:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    #room-code,
+    #room-qr img {
+      grid-area: 1 / 1;
+    }
+
+    #room-code {
+      z-index: 0;
+      color: var(--gold);
+      font-size: 0.95rem;
+      letter-spacing: 0.14em;
+      line-height: 1;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #room-qr img {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: var(--qr-img);
+      height: var(--qr-img);
+    }
+
+    #room:hover #room-code,
+    #room:focus-within #room-code {
+      opacity: 1;
+    }
+
+    #room:hover #room-qr,
+    #room:focus-within #room-qr {
+      background: var(--board-bg);
+    }
+
+    #room:hover #room-qr img,
+    #room:focus-within #room-qr img {
+      opacity: 0;
+    }
+
+    #qr-zoom {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.84);
+      cursor: pointer;
+    }
+
+    #qr-zoom[hidden] {
+      display: none;
+    }
+
+    #qr-zoom img,
+    #room-preview img {
+      width: min(72vw, 420px);
+      height: auto;
+      padding: 16px;
+      background: #fff;
+    }
+
+    #qr-zoom p,
+    #room-preview p {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      letter-spacing: 0.2em;
+    }
+
+    #room-preview {
+      position: fixed;
+      inset: 0;
+      z-index: 22;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.84);
+      pointer-events: none;
+    }
+
+    #room:hover #room-preview,
+    #room:focus-within #room-preview {
+      display: flex;
+    }
+
+    body:has(#qr-zoom:not([hidden])) #room-preview {
+      display: none;
+    }
+
+    #buzz-lock {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      z-index: 25;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: min(34rem, calc(100vw - 24px));
+      min-width: 9rem;
+      padding: 10px 18px 8px;
+      border: 3px solid #fff;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 1.1;
+      user-select: none;
+    }
+
+    #buzz-lock[hidden] {
+      display: none;
+    }
+
+    #buzz-lock.can-reopen {
+      cursor: pointer;
+    }
+
+    #buzz-lock.can-reopen:hover,
+    #buzz-lock.can-reopen:focus-visible {
+      filter: brightness(1.08);
+    }
+
+    #buzz-lock strong {
+      display: block;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #buzz-clock {
+      display: block;
+      margin-top: 2px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    #buzz-clock[hidden] {
+      display: none;
+    }
+
+    #buzz-lock span {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    #buzz-lock span:empty {
+      display: none;
+    }
+
+    #buzz-qr {
+      display: block;
+      margin: 10px auto 2px;
+      padding: 8px;
+      border: 0;
+      border-radius: 4px;
+      background: #fff;
+      line-height: 0;
+      cursor: pointer;
+    }
+
+    #buzz-qr[hidden] {
+      display: none;
+    }
+
+    #buzz-qr img {
+      display: block;
+      width: min(46vw, 240px);
+      height: auto;
+    }
+
     #score-bar {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 8px;
-      margin-left: auto;
     }
 
     #score-bar[hidden] {
@@ -96,8 +332,10 @@
 
     .score-team {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 2px;
       min-height: 44px;
       min-width: 4.5rem;
       padding: 6px 14px;
@@ -107,7 +345,23 @@
       font-size: clamp(1.05rem, 2vw, 1.45rem);
       font-weight: 700;
       letter-spacing: 0.04em;
+      line-height: 1;
     }
+
+    .score-name {
+      max-width: 7.5rem;
+      overflow: hidden;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .score-team.leader {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
     }
 
     .color-swatch {
@@ -125,6 +379,7 @@
     }
 
     #menu-toggle,
+    #judge-open,
     #sound,
     #music-link,
     #credits-open,
@@ -143,49 +398,37 @@
     }
 
     #menu {
-      position: fixed;
-      top: max(12px, env(safe-area-inset-top));
-      right: max(12px, env(safe-area-inset-right));
+      position: relative;
       z-index: 30;
       display: flex;
+      flex-shrink: 0;
       flex-direction: column;
       align-items: flex-end;
+      align-self: flex-end;
     }
 
     #menu-toggle {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-evenly;
       align-items: center;
-      gap: 5px;
-      width: 48px;
-      height: 48px;
-      padding: 0;
+      width: 28px;
+      height: var(--qr-box);
+      padding: 8px 0;
     }
 
     #menu-toggle span {
       display: block;
-      width: 22px;
-      height: 2px;
+      width: 5px;
+      height: 5px;
       background: currentColor;
-      border-radius: 1px;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-
-    #menu.open #menu-toggle span:nth-child(1) {
-      transform: translateY(7px) rotate(45deg);
-    }
-
-    #menu.open #menu-toggle span:nth-child(2) {
-      opacity: 0;
-    }
-
-    #menu.open #menu-toggle span:nth-child(3) {
-      transform: translateY(-7px) rotate(-45deg);
+      border-radius: 50%;
     }
 
     #menu-panel {
-      margin-top: 8px;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
       padding: 8px;
       max-height: calc(100vh - 80px);
       overflow: auto;
@@ -199,11 +442,20 @@
       display: none;
     }
 
+    #judge-open,
     #sound,
     #music-link,
     #credits-open {
       width: 100%;
       white-space: nowrap;
+    }
+
+    #judge-open[hidden] {
+      display: none;
+    }
+
+    #judge-open {
+      margin-bottom: 8px;
     }
 
     #music-link {
@@ -259,6 +511,8 @@
 
     #menu-toggle:hover,
     #menu-toggle:focus-visible,
+    #judge-open:hover,
+    #judge-open:focus-visible,
     #sound:hover,
     #sound:focus-visible {
       background: var(--gold);
@@ -317,11 +571,47 @@
     }
 
     .cell.clue.played {
+      position: relative;
       background: var(--played);
       border-color: #151a40;
       color: transparent;
       text-shadow: none;
       cursor: default;
+    }
+
+    .clue-deltas {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px;
+      pointer-events: none;
+    }
+
+    .clue-deltas-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+      pointer-events: auto;
+    }
+
+    .clue-delta {
+      appearance: none;
+      width: clamp(14px, 2vw, 26px);
+      height: clamp(14px, 2vw, 26px);
+      padding: 0;
+      border: 2px solid #fff;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .clue-delta:hover,
+    .clue-delta:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
     }
 
     #overlay {
@@ -407,19 +697,123 @@
     #overlay.question #overlay-text {
       color: var(--gold);
       width: auto;
-      max-width: none;
+      max-width: 92vw;
       font-size: 17.6vw;
-      line-height: 1.2;
+      line-height: 1.15;
       white-space: nowrap;
+    }
+
+    @media (max-width: 700px) {
+      #overlay {
+        gap: 12px;
+        padding: 3vh 4vw 9vh;
+        overflow: auto;
+      }
+
+      #overlay-text {
+        font-size: clamp(1.15rem, 5.4vw, 2.2rem);
+        line-height: 1.2;
+      }
+
+      #overlay.question {
+        gap: 8px;
+        padding: 2vh 4vw 8vh;
+      }
+
+      #overlay.question #overlay-text {
+        max-width: 92vw;
+        font-size: clamp(1.35rem, 7vw, 2.5rem);
+        white-space: normal;
+      }
+
+      #overlay-prompt {
+        font-size: clamp(0.95rem, 3.6vw, 1.2rem);
+        line-height: 1.25;
+      }
     }
 
     #overlay-hint {
       position: absolute;
       bottom: 24px;
+      max-width: 92vw;
       font-size: 0.95rem;
       letter-spacing: 0.16em;
+      text-align: center;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.55);
+    }
+
+    #moment {
+      position: fixed;
+      inset: 0;
+      z-index: 28;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 24px;
+      background: rgba(0, 8, 20, 0.94);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    #moment[hidden] {
+      display: none;
+    }
+
+    #moment-kicker,
+    #moment-hint {
+      margin: 0;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    #moment-hint {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    #moment-title {
+      max-width: 92vw;
+      margin: 0;
+      color: #fff;
+      font-size: clamp(2.6rem, 9vw, 6.4rem);
+      letter-spacing: 0.06em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      text-wrap: balance;
+      text-shadow: 0 2px 0 #7a5c00;
+    }
+
+    #moment-standings {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: min(28rem, 92vw);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    #moment-standings[hidden] {
+      display: none;
+    }
+
+    #moment-standings li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: clamp(1.15rem, 3vw, 1.7rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    #moment-standings li.leader {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
     }
 
     #overlay.has-awards {
@@ -456,11 +850,15 @@
     }
 
     .award-label {
+      max-width: 8rem;
+      overflow: hidden;
       font-size: 0.78rem;
       letter-spacing: 0.12em;
+      text-overflow: ellipsis;
       text-transform: uppercase;
       color: #fff;
       text-shadow: 0 1px 2px #000;
+      white-space: nowrap;
     }
 
     .award-team button {
@@ -621,16 +1019,29 @@
 </head>
 <body>
   <header>
-    <h1><button id="title" type="button" title="Deal a new game">Jeopardy</button></h1>
-    <div id="score-bar" hidden></div>
-  </header>
-  <div id="menu">
+    <h1><button id="title" type="button" title="Deal a new game">Quizgrid</button></h1>
+    <div id="header-tools">
+      <div id="score-bar" hidden></div>
+      <div id="room" hidden>
+        <span id="room-qr-label">Buzzers</span>
+        <button id="room-qr" type="button" title="Enlarge the buzzer QR code">
+          <span id="room-code"></span>
+          <img id="room-qr-img" alt="" width="64" height="64" />
+        </button>
+        <div id="room-preview" aria-hidden="true">
+          <img id="room-preview-img" alt="" />
+          <p id="room-preview-code"></p>
+        </div>
+      </div>
+    </div>
+    <div id="menu">
     <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
     </button>
     <div id="menu-panel" hidden>
+      <button id="judge-open" type="button" hidden>Judge window</button>
       <button id="sound" type="button" aria-pressed="true">Music on</button>
       <a id="music-link" href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer" hidden>Think music</a>
       <div class="menu-section">
@@ -645,6 +1056,20 @@
         <div id="remove-teams" class="swatch-row"></div>
       </div>
     </div>
+  </div>
+    <div id="buzz-lock" hidden role="status">
+      <strong></strong>
+      <button id="buzz-qr" type="button" hidden title="Enlarge the buzzer QR code">
+        <img id="buzz-qr-img" alt="" width="240" height="240" />
+      </button>
+      <b id="buzz-clock" hidden></b>
+      <span data-buzz-note></span>
+      <span id="buzz-roster"></span>
+    </div>
+  </header>
+  <div id="qr-zoom" hidden>
+    <img id="qr-zoom-img" alt="" />
+    <p id="qr-zoom-code"></p>
   </div>
   <div id="credits" hidden>
     <div class="credits-card" role="dialog" aria-modal="true" aria-labelledby="credits-title">
@@ -671,13 +1096,13 @@
         <li><a href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer">Internet Archive</a></li>
         <li><a href="https://www.televisiontunes.com/Jeopardy_-_1997_-_Think_Music.html" target="_blank" rel="noopener noreferrer">televisiontunes.com</a></li>
       </ul>
-      <p>When a clue includes a source, the citation and link appear on the question page.</p>
-      <p class="first-credit" hidden>BIOBUZZ clues cite the <a href="https://ftc-resources.firstinspires.org/ftc/game/cm-html/BIOBUZZ%20Competition%20Manual%20-%20TU02.htm" target="_blank" rel="noopener noreferrer">BIOBUZZ Competition Manual, version TU02 (September 24, 2026)</a>. Added clues were checked against Team Update 03. Posted Updates uses Team Updates 00 through 03, through October 1, 2026.</p>
+      <p>When a clue includes a source, the citation and link appear on the question page, and on each buzzer after the question is revealed.</p>
+      <p class="first-credit" hidden>BIOBUZZ clues cite the <a href="https://ftc-resources.firstinspires.org/ftc/game/cm-html" target="_blank" rel="noopener noreferrer">current BIOBUZZ Competition Manual HTML</a>. That address always opens the latest release and keeps the section anchor. Today that release is version TU04 (October 8, 2026). Posted Updates uses Team Updates 00 through 03, through October 1, 2026.</p>
       <h3>Repository</h3>
       <ul>
-        <li><a href="https://github.com/The-Allsparks/custom-jeopardy" target="_blank" rel="noopener noreferrer">custom-jeopardy on GitHub</a></li>
-        <li><a href="https://github.com/The-Allsparks/custom-jeopardy/tree/main" target="_blank" rel="noopener noreferrer">main — Classroom Jeopardy</a></li>
-        <li><a href="https://github.com/The-Allsparks/custom-jeopardy/tree/ftc-biobuzz" target="_blank" rel="noopener noreferrer">ftc-biobuzz — FTC BIOBUZZ</a></li>
+        <li><a href="https://github.com/The-Allsparks/quizgrid" target="_blank" rel="noopener noreferrer">Quizgrid on GitHub</a></li>
+        <li><a href="https://github.com/The-Allsparks/quizgrid/tree/main" target="_blank" rel="noopener noreferrer">main — Classroom Jeopardy</a></li>
+        <li><a href="https://github.com/The-Allsparks/quizgrid/tree/ftc-biobuzz" target="_blank" rel="noopener noreferrer">ftc-biobuzz — FTC BIOBUZZ</a></li>
       </ul>
     </div>
   </div>
@@ -695,8 +1120,15 @@
     <div id="award-bar" hidden></div>
     <div id="overlay-hint">Click to continue</div>
   </div>
+  <div id="moment" hidden>
+    <p id="moment-kicker"></p>
+    <h2 id="moment-title"></h2>
+    <ol id="moment-standings" hidden></ol>
+    <p id="moment-hint"></p>
+  </div>
 
   <script src="board.txt"></script>
+  <script src="qrcode.js"></script>
   <script>
     (function () {
       const boardEl = document.getElementById("board");
@@ -718,6 +1150,13 @@
       const removeTeamsEl = document.getElementById("remove-teams");
       const scoreBar = document.getElementById("score-bar");
       const awardBar = document.getElementById("award-bar");
+      const overlayHint = document.getElementById("overlay-hint");
+      const judgeOpen = document.getElementById("judge-open");
+      const momentEl = document.getElementById("moment");
+      const momentKicker = document.getElementById("moment-kicker");
+      const momentTitle = document.getElementById("moment-title");
+      const momentStandings = document.getElementById("moment-standings");
+      const momentHint = document.getElementById("moment-hint");
 
       if (typeof BOARD !== "string") {
         showError("Could not load board.txt. Keep index.html and board.txt in the same folder, then refresh.");
@@ -727,8 +1166,8 @@
       const CATEGORIES_PER_ROUND = 6;
       const CLUES_ON_BOARD = 5;
       const ROUND_PLAN = [
-        { name: "Jeopardy", values: ["200", "400", "600", "800", "1000"] },
-        { name: "Double Jeopardy", values: ["400", "800", "1200", "1600", "2000"] }
+        { name: "Round 1", values: ["200", "400", "600", "800", "1000"] },
+        { name: "Round 2", values: ["400", "800", "1200", "1600", "2000"] }
       ];
       const TEAM_COLORS = [
         { id: "red", label: "Red", hex: "#e11d2e" },
@@ -749,21 +1188,50 @@
       let game = loadOrDeal();
       let storageKey = playedStorageKey();
       let played = new Set(loadPlayed());
+      let clueAwards = loadAwards();
       let active = null;
       let roundIndex = loadRoundIndex();
       let teams = loadTeams();
+      let roomSocket = null;
+      let roomCode = "";
+      let roomToken = "";
+      let buzzWinner = null;
+      let roomState = null;
+      let clockTimer = null;
+      let lastActionId = "";
+      const ANSWER_MS = 10000;
+      const ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       const musicLink = document.getElementById("music-link");
       const credits = document.getElementById("credits");
       const creditsOpen = document.getElementById("credits-open");
       const creditsClose = document.getElementById("credits-close");
-      const thinkAudio = new Audio(encodeURI("Jeopardy - 1997 - Think Music.mp3"));
+      const LOCAL_TRACK = encodeURI("think.mp3");
+      const ARCHIVE_TRACK = "https://archive.org/download/tvtunes_29826/Jeopardy%20-%201997%20-%20Think%20Music.mp3";
+      const thinkAudio = new Audio();
       thinkAudio.preload = "auto";
       let muted = loadMuted();
       let localTrackMissing = false;
+      const trackReady = chooseThinkTrack();
+
+      let thinkPausedForBuzz = false;
+      let thinkFinishedDuringBuzz = false;
+      let ignoreThinkEnd = false;
+      let overlayAdvancing = false;
 
       thinkAudio.addEventListener("error", function () {
         localTrackMissing = true;
         updateSoundButtons();
+      });
+      thinkAudio.addEventListener("ended", function () {
+        thinkPausedForBuzz = false;
+        if (ignoreThinkEnd || !active || active.step !== "answer") {
+          return;
+        }
+        if (buzzPending()) {
+          thinkFinishedDuringBuzz = true;
+          return;
+        }
+        advanceOverlay();
       });
 
       titleEl.textContent = game.title;
@@ -771,6 +1239,7 @@
       updateSoundButtons();
       renderTeamMenu();
       renderAll();
+      connectRoom();
       if (usesFirstMaterials(pool)) {
         Array.prototype.forEach.call(document.querySelectorAll(".first-credit"), function (item) {
           item.hidden = false;
@@ -793,6 +1262,14 @@
       });
 
       soundBtn.addEventListener("click", toggleSound);
+      judgeOpen.addEventListener("click", function () {
+        if (!roomCode || !roomToken) {
+          return;
+        }
+        const url = new URL("/judge?room=" + roomCode + "&token=" + encodeURIComponent(roomToken), location.href);
+        window.open(url.href, "jeopardy-judge");
+        closeMenu();
+      });
       creditsOpen.addEventListener("click", function () {
         closeMenu();
         openCredits();
@@ -817,16 +1294,12 @@
       }, true);
 
       window.addEventListener("resize", function () {
-        if (active && active.step === "question") {
-          fitQuestionText();
-        }
+        fitOverlayType();
       });
 
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(function () {
-          if (active && active.step === "question") {
-            fitQuestionText();
-          }
+          fitOverlayType();
         });
       }
 
@@ -835,15 +1308,35 @@
           event.stopPropagation();
           return;
         }
+        if (buzzPending()) {
+          return;
+        }
         advanceOverlay();
       });
 
+      momentEl.addEventListener("click", function () {
+        hideMoment();
+      });
+
       document.addEventListener("keydown", function (event) {
+        const qrZoom = document.getElementById("qr-zoom");
+        if (!qrZoom.hidden) {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            qrZoom.hidden = true;
+          }
+          return;
+        }
         if (!credits.hidden) {
           if (event.key === "Escape") {
             event.preventDefault();
             closeCredits();
           }
+          return;
+        }
+        if (!momentEl.hidden && (event.key === "Escape" || event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          hideMoment();
           return;
         }
         if (event.key === "m" || event.key === "M") {
@@ -859,6 +1352,11 @@
           closeMenu();
           return;
         }
+        if ((event.key === "r" || event.key === "R") && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && roomState && roomState.winner) {
+          event.preventDefault();
+          window.resetBuzz();
+          return;
+        }
         if (!overlayEl.classList.contains("open")) {
           return;
         }
@@ -866,7 +1364,18 @@
             (menu.contains(event.target) || awardBar.contains(event.target) || event.target === overlayLink)) {
           return;
         }
+        if (event.key === "Escape" && active && active.step === "answer") {
+          if (buzzPending()) {
+            return;
+          }
+          event.preventDefault();
+          dismissClue();
+          return;
+        }
         if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
+          if (buzzPending()) {
+            return;
+          }
           event.preventDefault();
           advanceOverlay();
         }
@@ -874,7 +1383,7 @@
 
       function parseBoard(text) {
         const categories = [];
-        let title = "Jeopardy";
+        let title = "Quizgrid";
         let current = null;
 
         String(text).split(/\r?\n/).forEach(function (raw) {
@@ -1064,7 +1573,9 @@
         storageKey = playedStorageKey();
         removeSession(previousKey);
         removeSession(previousKey + ":round");
+        removeSession(previousKey + ":awards");
         played = new Set();
+        clueAwards = {};
         active = null;
         roundIndex = 0;
         teams.forEach(function (team) {
@@ -1074,9 +1585,12 @@
         savePlayed();
         saveRound();
         stopThinkMusic();
+        sendRoom({ type: "disarm" });
+        hideMoment();
         overlayEl.classList.remove("open", "question");
         renderAwardBar();
         renderAll();
+        publishBoard();
       }
 
       function loadOrDeal() {
@@ -1147,8 +1661,9 @@
             return;
           }
           const score = Number(item.score);
+          const name = typeof item.name === "string" ? item.name.replace(/[\u0000-\u001f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 16) : "";
           seen[item.id] = true;
-          loaded.push({ id: item.id, score: Number.isFinite(score) ? score : 0 });
+          loaded.push({ id: item.id, score: Number.isFinite(score) ? score : 0, name: name });
         });
         return loaded;
       }
@@ -1161,11 +1676,14 @@
         if (!colorById(id) || teamById(id)) {
           return;
         }
-        teams.push({ id: id, score: 0 });
+        teams.push({ id: id, score: 0, name: "" });
         saveTeams();
         renderTeamMenu();
         renderScoreBar();
         renderAwardBar();
+        sendTeams();
+        publishBoard();
+        renderBuzzLock();
       }
 
       function removeTeam(id) {
@@ -1173,9 +1691,13 @@
           return team.id !== id;
         });
         saveTeams();
+        stripAwardsFor(id);
         renderTeamMenu();
-        renderScoreBar();
+        renderAll();
         renderAwardBar();
+        sendTeams();
+        publishBoard();
+        renderBuzzLock();
       }
 
       function adjustScore(id, delta) {
@@ -1185,7 +1707,89 @@
         }
         team.score += delta;
         saveTeams();
+        if (active) {
+          recordAward(active.id, id, delta);
+        }
         renderScoreBar(id);
+        publishBoard();
+      }
+
+      function loadAwards() {
+        const saved = readSession(storageKey + ":awards");
+        if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+          return {};
+        }
+        const loaded = {};
+        Object.keys(saved).forEach(function (clueId) {
+          if (!Array.isArray(saved[clueId])) {
+            return;
+          }
+          const entries = [];
+          saved[clueId].forEach(function (entry) {
+            if (!entry || !colorById(entry.team) || !Number.isFinite(Number(entry.delta)) || !Number(entry.delta)) {
+              return;
+            }
+            entries.push({ team: entry.team, delta: Number(entry.delta) });
+          });
+          if (entries.length) {
+            loaded[clueId] = entries;
+          }
+        });
+        return loaded;
+      }
+
+      function saveAwards() {
+        writeSession(storageKey + ":awards", clueAwards);
+      }
+
+      function recordAward(clueId, teamId, delta) {
+        if (!clueAwards[clueId]) {
+          clueAwards[clueId] = [];
+        }
+        clueAwards[clueId].push({ team: teamId, delta: delta });
+        saveAwards();
+      }
+
+      function stripAwardsFor(teamId) {
+        Object.keys(clueAwards).forEach(function (clueId) {
+          clueAwards[clueId] = clueAwards[clueId].filter(function (entry) {
+            return entry.team !== teamId;
+          });
+          if (!clueAwards[clueId].length) {
+            delete clueAwards[clueId];
+          }
+        });
+        saveAwards();
+      }
+
+      function undoAward(clueId, teamId, sign) {
+        const list = clueAwards[clueId] || [];
+        let removed = 0;
+        const kept = [];
+        list.forEach(function (entry) {
+          const sameSide = entry.team === teamId && ((sign > 0 && entry.delta > 0) || (sign < 0 && entry.delta < 0));
+          if (sameSide) {
+            removed += entry.delta;
+            return;
+          }
+          kept.push(entry);
+        });
+        if (!removed) {
+          return;
+        }
+        if (kept.length) {
+          clueAwards[clueId] = kept;
+        } else {
+          delete clueAwards[clueId];
+        }
+        const team = teamById(teamId);
+        if (team) {
+          team.score -= removed;
+          saveTeams();
+        }
+        saveAwards();
+        renderAll();
+        publishBoard();
       }
 
       function clueAmount(clue) {
@@ -1242,27 +1846,73 @@
         removeSection.hidden = teams.length === 0;
       }
 
+      function teamLabel(team) {
+        if (team && team.name) {
+          return team.name;
+        }
+        const color = team ? colorById(team.id) : null;
+        return color ? color.label : (team ? team.id : "");
+      }
+
+      function leadingTeams() {
+        if (!teams.length) {
+          return [];
+        }
+        let best = teams[0].score;
+        teams.forEach(function (team) {
+          if (team.score > best) {
+            best = team.score;
+          }
+        });
+        return teams.filter(function (team) {
+          return team.score === best;
+        });
+      }
+
+      function leaderIds() {
+        const leaders = leadingTeams();
+        if (!leaders.length || leaders.length === teams.length) {
+          return {};
+        }
+        const ids = {};
+        leaders.forEach(function (team) {
+          ids[team.id] = true;
+        });
+        return ids;
+      }
+
       function renderScoreBar(bumpedId) {
         scoreBar.innerHTML = "";
         scoreBar.hidden = teams.length < 2;
+        syncRoomVisibility();
         if (scoreBar.hidden) {
           return;
         }
+        const leaders = leaderIds();
         teams.forEach(function (team) {
           const color = colorById(team.id);
           const item = document.createElement("div");
-          item.className = "score-team" + (team.id === bumpedId ? " bump" : "");
+          item.className = "score-team" + (team.id === bumpedId ? " bump" : "") + (leaders[team.id] ? " leader" : "");
           item.style.background = color.hex;
           item.style.color = inkFor(color.hex);
-          item.setAttribute("aria-label", color.label + ", " + formatMoney(team.score));
-          item.textContent = formatMoney(team.score);
+          item.title = teamLabel(team);
+          item.setAttribute("aria-label", teamLabel(team) + ", " + formatMoney(team.score));
+          const name = document.createElement("span");
+          name.className = "score-name";
+          name.textContent = teamLabel(team);
+          const value = document.createElement("span");
+          value.textContent = formatMoney(team.score);
+          item.appendChild(name);
+          item.appendChild(value);
           scoreBar.appendChild(item);
         });
       }
 
       function renderAwardBar() {
         awardBar.innerHTML = "";
-        const show = !!(active && active.step === "answer" && teams.length >= 2);
+        const liveRoom = !!(roomState && roomCode);
+        const buzzing = roomState && roomState.winner;
+        const show = !!(active && active.step === "answer" && teams.length >= 2 && !(roomState && roomState.judge) && (!liveRoom || buzzing));
         awardBar.hidden = !show;
         overlayEl.classList.toggle("has-awards", show);
         if (!show) {
@@ -1270,17 +1920,20 @@
         }
         const value = clueAmount(active.clue);
         teams.forEach(function (team) {
+          if (buzzing && team.id !== roomState.winner) {
+            return;
+          }
           const color = colorById(team.id);
           const ink = inkFor(color.hex);
           const group = document.createElement("div");
           group.className = "award-team";
           const caption = document.createElement("div");
           caption.className = "award-label";
-          caption.textContent = color.label;
+          caption.textContent = teamLabel(team);
           const actions = document.createElement("div");
           actions.className = "award-actions";
-          actions.appendChild(awardButton(color, ink, "+", value, "Add " + formatMoney(value) + " for " + color.label));
-          actions.appendChild(awardButton(color, ink, "−", -value, "Subtract " + formatMoney(value) + " for " + color.label));
+          actions.appendChild(awardButton(color, ink, "+", value, "Add " + formatMoney(value) + " for " + teamLabel(team)));
+          actions.appendChild(awardButton(color, ink, "−", -value, "Subtract " + formatMoney(value) + " for " + teamLabel(team)));
           group.appendChild(caption);
           group.appendChild(actions);
           awardBar.appendChild(group);
@@ -1303,6 +1956,11 @@
           used = true;
           button.disabled = true;
           adjustScore(color.id, delta);
+          if (delta < 0) {
+            sendRoom({ type: "miss", color: color.id });
+          } else if (color.id === buzzWinner) {
+            window.resetBuzz();
+          }
           if (delta > 0) {
             advanceOverlay();
           }
@@ -1331,19 +1989,86 @@
 
           category.clues.forEach(function (clue, clueIndex) {
             const id = clueId(roundIndex, categoryIndex, clueIndex);
-            const cell = document.createElement("button");
-            cell.type = "button";
-            cell.className = "cell clue" + (played.has(id) ? " played" : "");
+            const done = played.has(id);
+            const cell = document.createElement(done ? "div" : "button");
+            if (!done) {
+              cell.type = "button";
+              cell.addEventListener("click", function () {
+                openClue(category, clue, id);
+              });
+            }
+            cell.className = "cell clue" + (done ? " played" : "");
             cell.textContent = String(clue.value).replace(/^\$/, "");
             cell.style.gridColumn = String(categoryIndex + 1);
             cell.style.gridRow = String(clueIndex + 2);
-            cell.disabled = played.has(id);
-            cell.addEventListener("click", function () {
-              openClue(category, clue, id);
-            });
+            if (done) {
+              appendClueDeltas(cell, id);
+            }
             boardEl.appendChild(cell);
           });
         });
+      }
+
+      function appendClueDeltas(cell, clueId) {
+        const sides = clueDeltaSides(clueId);
+        if (!sides.gains.length && !sides.losses.length) {
+          return;
+        }
+        const marks = document.createElement("div");
+        marks.className = "clue-deltas";
+        marks.appendChild(deltaSide(clueId, sides.gains, 1));
+        marks.appendChild(deltaSide(clueId, sides.losses, -1));
+        cell.appendChild(marks);
+      }
+
+      function deltaSide(clueId, entries, sign) {
+        const side = document.createElement("div");
+        side.className = "clue-deltas-side";
+        entries.forEach(function (entry) {
+          const color = colorById(entry.team);
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "clue-delta";
+          button.style.background = color.hex;
+          const verb = sign > 0 ? "gained" : "lost";
+          button.setAttribute("aria-label", "Undo " + formatMoney(Math.abs(entry.delta)) + " " + verb + " by " + color.label);
+          button.title = button.getAttribute("aria-label");
+          button.addEventListener("click", function (event) {
+            event.stopPropagation();
+            undoAward(clueId, entry.team, sign);
+          });
+          side.appendChild(button);
+        });
+        return side;
+      }
+
+      function clueDeltaSides(clueId) {
+        const gains = {};
+        const losses = {};
+        (clueAwards[clueId] || []).forEach(function (entry) {
+          if (!teamById(entry.team) || !entry.delta) {
+            return;
+          }
+          if (entry.delta > 0) {
+            gains[entry.team] = (gains[entry.team] || 0) + entry.delta;
+          } else {
+            losses[entry.team] = (losses[entry.team] || 0) + entry.delta;
+          }
+        });
+        return {
+          gains: deltaList(gains),
+          losses: deltaList(losses)
+        };
+      }
+
+      function deltaList(totals) {
+        const list = [];
+        teams.forEach(function (team) {
+          if (totals[team.id]) {
+            list.push({ team: team.id, delta: totals[team.id] });
+          }
+        });
+        return list;
       }
 
       function canOpenRound(index) {
@@ -1396,25 +2121,49 @@
         overlayPrompt.textContent = "";
         hideSource();
         clearQuestionFit();
+        fitAnswerText();
         console.log("[Judge] " + clueMeta(category, clue) + "\n" + clue.question);
+        overlayHint.textContent = "Click to continue. Esc puts it back.";
+        syncBuzzHint();
         renderAwardBar();
         startThinkMusic();
+        sendRoom({ type: "arm", fresh: true });
+        publishBoard();
       }
 
-      function advanceOverlay() {
-        if (!active) {
+      function dismissClue() {
+        if (!active || active.step !== "answer") {
           return;
         }
         stopThinkMusic();
+        sendRoom({ type: "disarm" });
+        hideSource();
+        clearQuestionFit();
+        active = null;
+        overlayEl.classList.remove("open", "question");
+        renderAwardBar();
+        publishBoard();
+      }
+
+      function advanceOverlay() {
+        if (!active || overlayAdvancing) {
+          return;
+        }
+        overlayAdvancing = true;
+        stopThinkMusic();
+        sendRoom({ type: "disarm" });
         if (active.step === "answer") {
           active.step = "question";
           overlayEl.classList.add("question");
           overlayLabel.textContent = "Question";
           overlayPrompt.textContent = active.clue.answer;
           overlayText.textContent = active.clue.question;
+          overlayHint.textContent = "Click to continue";
           showSource(active.clue);
-          fitQuestionText();
+          fitOverlayType();
           renderAwardBar();
+          publishBoard();
+          overlayAdvancing = false;
           return;
         }
         hideSource();
@@ -1428,8 +2177,74 @@
         if (!wasComplete && isRoundComplete(roundIndex) && canOpenRound(roundIndex + 1)) {
           roundIndex += 1;
           saveRound();
+          renderAll();
+          showRoundCard();
+          publishBoard();
+          overlayAdvancing = false;
+          return;
         }
         renderAll();
+        if (!wasComplete && isRoundComplete(roundIndex)) {
+          showFinalCard();
+        }
+        publishBoard();
+        overlayAdvancing = false;
+      }
+
+      function roundLabel(index) {
+        const plan = ROUND_PLAN[index];
+        return plan && plan.name ? plan.name : "Round " + (index + 1);
+      }
+
+      function showRoundCard() {
+        momentKicker.textContent = "Next round";
+        momentTitle.textContent = roundLabel(roundIndex);
+        momentStandings.hidden = true;
+        momentStandings.innerHTML = "";
+        momentHint.textContent = "Click to start";
+        momentEl.hidden = false;
+      }
+
+      function showFinalCard() {
+        const ranked = teams.slice().sort(function (a, b) {
+          return b.score - a.score;
+        });
+        const leaders = leadingTeams();
+        momentKicker.textContent = "Final scores";
+        if (!ranked.length) {
+          momentTitle.textContent = "That's the board";
+        } else if (leaders.length === 1) {
+          momentTitle.textContent = teamLabel(leaders[0]);
+        } else {
+          momentTitle.textContent = "Tie";
+        }
+        momentStandings.innerHTML = "";
+        momentStandings.hidden = ranked.length === 0;
+        ranked.forEach(function (team) {
+          const color = colorById(team.id);
+          const row = document.createElement("li");
+          const ahead = leaders.some(function (leader) {
+            return leader.id === team.id;
+          });
+          if (ahead) {
+            row.className = "leader";
+          }
+          row.style.background = color.hex;
+          row.style.color = inkFor(color.hex);
+          const name = document.createElement("span");
+          name.textContent = teamLabel(team);
+          const value = document.createElement("span");
+          value.textContent = formatMoney(team.score);
+          row.appendChild(name);
+          row.appendChild(value);
+          momentStandings.appendChild(row);
+        });
+        momentHint.textContent = "Click to close";
+        momentEl.hidden = false;
+      }
+
+      function hideMoment() {
+        momentEl.hidden = true;
       }
 
       function showSource(clue) {
@@ -1457,13 +2272,103 @@
         overlayLink.removeAttribute("title");
       }
 
+      function fitLimit() {
+        var limit = overlayHint.getBoundingClientRect().top - 16;
+        if (awardBar && !awardBar.hidden) {
+          var awardTop = awardBar.getBoundingClientRect().top;
+          if (awardTop > 0 && awardTop < limit) {
+            limit = awardTop - 12;
+          }
+        }
+        if (window.getComputedStyle(overlayLink).display !== "none") {
+          var linkTop = overlayLink.getBoundingClientRect().top;
+          if (linkTop > 0 && linkTop < limit) {
+            limit = linkTop - 12;
+          }
+        }
+        return limit;
+      }
+
+      function pastLimit() {
+        var limit = fitLimit();
+        var nodes = [overlayMeta, overlayPrompt.parentElement, overlayLabel, overlayText];
+        for (var i = 0; i < nodes.length; i++) {
+          var node = nodes[i];
+          if (!node || node.hidden) {
+            continue;
+          }
+          var style = window.getComputedStyle(node);
+          if (style.display === "none" || style.visibility === "hidden") {
+            continue;
+          }
+          if (node.getBoundingClientRect().bottom > limit) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function largestFit(node, floor, ceiling) {
+        floor = Math.floor(floor);
+        ceiling = Math.max(floor, Math.floor(ceiling));
+        node.style.fontSize = ceiling + "px";
+        if (!pastLimit()) {
+          return;
+        }
+        var low = floor;
+        var high = ceiling - 1;
+        var best = floor;
+        while (low <= high) {
+          var mid = Math.floor((low + high) / 2);
+          node.style.fontSize = mid + "px";
+          if (!pastLimit()) {
+            best = mid;
+            low = mid + 1;
+          } else {
+            high = mid - 1;
+          }
+        }
+        node.style.fontSize = best + "px";
+      }
+
+      function capPrompt(tight) {
+        if (!overlayPrompt.textContent) {
+          return;
+        }
+        var maxHeight = overlayEl.clientHeight * (tight ? 0.18 : 0.26);
+        var floor = window.innerWidth < 700 ? 13 : 20;
+        var size = parseFloat(window.getComputedStyle(overlayPrompt).fontSize);
+        var guard = 0;
+        if (!size) {
+          return;
+        }
+        while (size > floor && overlayPrompt.getBoundingClientRect().height > maxHeight && guard < 24) {
+          size = Math.max(floor, Math.floor(size * 0.88));
+          overlayPrompt.style.fontSize = size + "px";
+          guard += 1;
+        }
+      }
+
+      function fitAnswerText() {
+        overlayText.style.fontSize = "";
+        overlayText.style.width = "";
+        overlayText.style.maxWidth = "";
+        overlayText.style.whiteSpace = "";
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        var computed = parseFloat(window.getComputedStyle(overlayText).fontSize) || 48;
+        var floor = window.innerWidth < 700 ? 16 : 24;
+        largestFit(overlayText, floor, computed);
+      }
+
       function fitQuestionText() {
         if (!active || active.step !== "question") {
           clearQuestionFit();
           return;
         }
-        var target = Math.floor(window.innerWidth * 0.77);
-        var heightCap = Math.floor(window.innerHeight * 0.34);
+        overlayPrompt.style.fontSize = "";
+        var target = Math.floor(overlayEl.clientWidth * 0.9);
         overlayText.style.whiteSpace = "nowrap";
         overlayText.style.width = "auto";
         overlayText.style.maxWidth = "none";
@@ -1472,25 +2377,34 @@
         if (!measured) {
           return;
         }
-        var size = Math.floor((100 * target) / measured);
-        var heightAtSize = overlayText.scrollHeight * (size / 100);
-        if (heightAtSize > heightCap) {
-          size = Math.floor(size * heightCap / heightAtSize);
+        var oneLine = Math.floor((100 * target) / measured);
+        var maxLine = Math.floor(overlayEl.clientHeight * 0.38);
+        if (oneLine > maxLine) {
+          oneLine = maxLine;
         }
-        var minHuge = Math.max(77, Math.floor(window.innerWidth * 0.096));
-        if (size < minHuge) {
-          overlayText.style.whiteSpace = "normal";
-          overlayText.style.width = target + "px";
-          overlayText.style.maxWidth = target + "px";
-          size = Math.min(Math.floor(window.innerWidth * 0.112), heightCap);
-          overlayText.style.fontSize = size + "px";
-          while (size > 64 && overlayText.scrollHeight > heightCap) {
-            size -= 4;
-            overlayText.style.fontSize = size + "px";
-          }
+        capPrompt(false);
+        overlayText.style.fontSize = oneLine + "px";
+        if (!pastLimit()) {
           return;
         }
-        overlayText.style.fontSize = size + "px";
+        overlayText.style.whiteSpace = "normal";
+        overlayText.style.width = target + "px";
+        overlayText.style.maxWidth = target + "px";
+        capPrompt(true);
+        var floor = window.innerWidth < 700 ? 16 : 24;
+        var ceiling = Math.max(floor, Math.floor(overlayEl.clientHeight * 0.16));
+        largestFit(overlayText, floor, ceiling);
+      }
+
+      function fitOverlayType() {
+        if (!active || !overlayEl.classList.contains("open")) {
+          return;
+        }
+        if (active.step === "question") {
+          fitQuestionText();
+          return;
+        }
+        fitAnswerText();
       }
 
       function clearQuestionFit() {
@@ -1498,11 +2412,12 @@
         overlayText.style.width = "";
         overlayText.style.maxWidth = "";
         overlayText.style.whiteSpace = "";
+        overlayPrompt.style.fontSize = "";
       }
 
       function clueMeta(category, clue) {
         const valueLabel = String(clue.value).replace(/^\$/, "");
-        const roundName = game.rounds.length > 1 ? game.rounds[roundIndex].name + "  •  " : "";
+        const roundName = game.rounds.length > 1 ? roundLabel(roundIndex) + "  •  " : "";
         return roundName + category.name + "  •  " + valueLabel;
       }
 
@@ -1590,38 +2505,124 @@
         }
       }
 
+      function chooseThinkTrack() {
+        if (location.protocol === "file:") {
+          thinkAudio.src = LOCAL_TRACK;
+          return Promise.resolve();
+        }
+        if (location.hostname.endsWith(".workers.dev")) {
+          thinkAudio.src = ARCHIVE_TRACK;
+          return Promise.resolve();
+        }
+        return fetch(LOCAL_TRACK, { method: "HEAD" }).then(function (response) {
+          thinkAudio.src = response.ok ? LOCAL_TRACK : ARCHIVE_TRACK;
+        }).catch(function () {
+          thinkAudio.src = ARCHIVE_TRACK;
+        });
+      }
+
       function startThinkMusic() {
         if (muted || localTrackMissing) {
           return;
         }
-        const begin = function () {
-          thinkAudio.pause();
-          try {
-            thinkAudio.currentTime = 0;
-          } catch (error) {
-            // Metadata may not be ready on the first play.
+        trackReady.then(function () {
+          if (muted || localTrackMissing || !thinkAudio.src) {
+            return;
           }
-          const pending = thinkAudio.play();
-          if (pending && typeof pending.catch === "function") {
-            pending.catch(function () {
-              // Playback can fail if the file is missing. The board still works.
-            });
+          const begin = function () {
+            if (!active || active.step !== "answer") {
+              return;
+            }
+            ignoreThinkEnd = true;
+            thinkAudio.pause();
+            try {
+              thinkAudio.currentTime = 0;
+            } catch (error) {
+              // Metadata may not be ready on the first play.
+            }
+            ignoreThinkEnd = false;
+            if (buzzPending()) {
+              thinkPausedForBuzz = true;
+              return;
+            }
+            playThinkMusic();
+          };
+          if (thinkAudio.readyState >= 1) {
+            begin();
+            return;
           }
-        };
-        if (thinkAudio.readyState >= 1) {
-          begin();
+          thinkAudio.addEventListener("loadedmetadata", begin, { once: true });
+        });
+      }
+
+      function playThinkMusic() {
+        if (muted || localTrackMissing || !thinkAudio.src) {
           return;
         }
-        thinkAudio.addEventListener("loadedmetadata", begin, { once: true });
+        const pending = thinkAudio.play();
+        if (pending && typeof pending.catch === "function") {
+          pending.catch(function () {
+            // Playback can fail if the browser blocks it. The board still works.
+          });
+        }
       }
 
       function stopThinkMusic() {
+        thinkPausedForBuzz = false;
+        thinkFinishedDuringBuzz = false;
+        ignoreThinkEnd = true;
         thinkAudio.pause();
         try {
           thinkAudio.currentTime = 0;
         } catch (error) {
           // Ignore if the file has not loaded yet.
         }
+        ignoreThinkEnd = false;
+      }
+
+      function buzzPending() {
+        return !!(active && active.step === "answer" && roomState && roomState.winner);
+      }
+
+      function everyTeamOut() {
+        if (!active || active.step !== "answer" || !teams.length || !roomState) {
+          return false;
+        }
+        const out = Array.isArray(roomState.out) ? roomState.out : [];
+        return teams.every(function (team) {
+          return out.indexOf(team.id) !== -1;
+        });
+      }
+
+      function syncBuzzHint() {
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        overlayHint.textContent = buzzPending() ? "Score the buzz" : "Click to continue. Esc puts it back.";
+      }
+
+      function syncThinkMusic() {
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        if (buzzPending()) {
+          if (!thinkAudio.paused && !thinkAudio.ended) {
+            thinkPausedForBuzz = true;
+            thinkAudio.pause();
+          }
+          return;
+        }
+        if (thinkFinishedDuringBuzz) {
+          thinkPausedForBuzz = false;
+          thinkFinishedDuringBuzz = false;
+          advanceOverlay();
+          return;
+        }
+        if (!thinkPausedForBuzz) {
+          return;
+        }
+        thinkPausedForBuzz = false;
+        playThinkMusic();
       }
 
       function loadRoundIndex() {
@@ -1704,6 +2705,373 @@
         errorEl.classList.add("open");
         boardEl.style.display = "none";
       }
+
+      function connectRoom() {
+        if (location.protocol === "file:") {
+          return;
+        }
+        ensureRoomCredentials();
+        const codeEl = document.getElementById("room-code");
+        const qrButton = document.getElementById("room-qr");
+        codeEl.textContent = roomCode;
+        qrButton.title = "Room " + roomCode + ". Enlarge the buzzer QR code.";
+        qrButton.setAttribute("aria-label", "Buzzers, room " + roomCode + ". Enlarge the QR code.");
+        renderRoomQr();
+        syncRoomVisibility();
+        judgeOpen.hidden = false;
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const socket = new WebSocket(protocol + "//" + location.host + "/room?code=" + roomCode + "&role=host&token=" + encodeURIComponent(roomToken));
+        roomSocket = socket;
+        socket.addEventListener("open", function () {
+          sendTeams();
+          publishBoard();
+          if (active && active.step === "answer") {
+            sendRoom({ type: "arm" });
+          }
+        });
+        socket.addEventListener("message", function (event) {
+          let data;
+          try {
+            data = JSON.parse(event.data);
+          } catch (error) {
+            return;
+          }
+          if (data.type === "action") {
+            applyAction(data);
+            return;
+          }
+          if (data.type === "state") {
+            roomState = data;
+            roomState.receivedAt = Date.now();
+            applyRoomNames(data.names);
+            renderBuzzLock();
+            renderAwardBar();
+            syncBuzzHint();
+            if (everyTeamOut()) {
+              advanceOverlay();
+              return;
+            }
+            syncThinkMusic();
+          }
+        });
+        socket.addEventListener("close", function () {
+          if (roomSocket !== socket) {
+            return;
+          }
+          setTimeout(connectRoom, 1000);
+        });
+      }
+
+      function ensureRoomCredentials() {
+        const savedCode = readSession("jeopardy-room-code");
+        const savedToken = readSession("jeopardy-room-token");
+        roomCode = typeof savedCode === "string" ? savedCode : "";
+        roomToken = typeof savedToken === "string" ? savedToken : "";
+        if (!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/.test(roomCode)) {
+          roomCode = "";
+          for (let i = 0; i < 4; i++) {
+            roomCode += ROOM_ALPHABET[Math.floor(Math.random() * ROOM_ALPHABET.length)];
+          }
+          writeSession("jeopardy-room-code", roomCode);
+        }
+        if (!roomToken) {
+          roomToken = crypto.randomUUID();
+          writeSession("jeopardy-room-token", roomToken);
+        }
+      }
+
+      function syncRoomVisibility() {
+        document.getElementById("room").hidden = teams.length < 2 || !roomCode;
+      }
+
+      function buzzerUrl() {
+        return new URL("/buzzer?room=" + roomCode, location.href).href;
+      }
+
+      function renderRoomQr() {
+        if (typeof qrcode !== "function") {
+          return;
+        }
+        const qr = qrcode(0, "M");
+        qr.addData(buzzerUrl());
+        qr.make();
+        const image = qr.createDataURL(8, 2);
+        document.getElementById("room-qr-img").src = image;
+        document.getElementById("buzz-qr-img").src = image;
+        document.getElementById("buzz-qr-img").alt = "QR code for " + buzzerUrl();
+        document.getElementById("qr-zoom-img").src = image;
+        document.getElementById("qr-zoom-img").alt = "QR code for " + buzzerUrl();
+        document.getElementById("qr-zoom-code").textContent = roomCode;
+        document.getElementById("room-preview-img").src = image;
+        document.getElementById("room-preview-code").textContent = roomCode;
+      }
+
+      document.getElementById("buzz-qr").addEventListener("click", function (event) {
+        event.stopPropagation();
+        document.getElementById("qr-zoom").hidden = false;
+      });
+
+      document.getElementById("room-qr").addEventListener("click", function (event) {
+        event.stopPropagation();
+        document.getElementById("qr-zoom").hidden = false;
+      });
+
+      document.getElementById("qr-zoom").addEventListener("click", function () {
+        document.getElementById("qr-zoom").hidden = true;
+      });
+
+      function sendRoom(message) {
+        if (roomSocket && roomSocket.readyState === 1) {
+          roomSocket.send(JSON.stringify(message));
+        }
+      }
+
+      function sendTeams() {
+        sendRoom({
+          type: "teams",
+          colors: teams.map(function (team) {
+            return team.id;
+          })
+        });
+      }
+
+      function publishBoard() {
+        const scores = teams.map(function (team) {
+          return { id: team.id, score: team.score, name: team.name || "" };
+        });
+        let clue = null;
+        if (active) {
+          clue = {
+            id: active.id,
+            category: active.category.name,
+            value: String(active.clue.value),
+            answer: active.clue.answer,
+            question: active.clue.question,
+            citation: active.clue.citation || "",
+            url: active.clue.url || "",
+            step: active.step,
+            amount: clueAmount(active.clue)
+          };
+        }
+        sendRoom({
+          type: "board",
+          clue: clue,
+          scores: scores,
+          round: game.rounds[roundIndex] ? roundLabel(roundIndex) : ""
+        });
+      }
+
+      function applyAction(data) {
+        if (!data || data.type !== "action" || typeof data.id !== "string" || !data.id || data.id === lastActionId) {
+          return;
+        }
+        lastActionId = data.id;
+        if (data.action === "award") {
+          if (!active || active.step !== "answer") {
+            return;
+          }
+          const amount = clueAmount(active.clue);
+          const delta = Number(data.delta);
+          if (!teamById(data.color) || !amount || (delta !== amount && delta !== -amount)) {
+            return;
+          }
+          if (buzzPending() && data.color !== roomState.winner) {
+            return;
+          }
+          adjustScore(data.color, delta);
+          if (delta < 0) {
+            sendRoom({ type: "miss", color: data.color });
+          } else if (data.color === buzzWinner) {
+            window.resetBuzz();
+          }
+          if (delta > 0) {
+            advanceOverlay();
+          }
+          return;
+        }
+        if (data.action === "reveal" && active && active.step === "answer") {
+          if (buzzPending()) {
+            return;
+          }
+          advanceOverlay();
+          return;
+        }
+        if (data.action === "close" && active && active.step === "question") {
+          advanceOverlay();
+          return;
+        }
+        if (data.action === "dismiss") {
+          if (buzzPending()) {
+            return;
+          }
+          dismissClue();
+          return;
+        }
+        if (data.action === "reopen") {
+          if (buzzPending()) {
+            return;
+          }
+          window.resetBuzz();
+          return;
+        }
+        if (data.action === "finish") {
+          finishGame();
+        }
+      }
+
+      function finishGame() {
+        stopThinkMusic();
+        sendRoom({ type: "disarm" });
+        hideSource();
+        clearQuestionFit();
+        active = null;
+        overlayAdvancing = false;
+        overlayEl.classList.remove("open", "question");
+        renderAwardBar();
+        renderAll();
+        showFinalCard();
+        publishBoard();
+      }
+
+      function applyRoomNames(names) {
+        if (!names || typeof names !== "object" || !roomState) {
+          return;
+        }
+        const taken = Array.isArray(roomState.taken) ? roomState.taken : [];
+        let changed = false;
+        teams.forEach(function (team) {
+          const next = typeof names[team.id] === "string" ? names[team.id] : "";
+          const joined = taken.indexOf(team.id) !== -1;
+          if (next && next !== (team.name || "")) {
+            team.name = next;
+            changed = true;
+          } else if (joined && !next && team.name) {
+            team.name = "";
+            changed = true;
+          }
+        });
+        if (!changed) {
+          return;
+        }
+        saveTeams();
+        renderScoreBar();
+        const labels = awardBar.querySelectorAll(".award-label");
+        for (let i = 0; i < teams.length && i < labels.length; i++) {
+          labels[i].textContent = teamLabel(teams[i]);
+        }
+        publishBoard();
+      }
+
+      function displayColor(id) {
+        const named = roomState && roomState.names && roomState.names[id];
+        if (named) {
+          return named;
+        }
+        const team = teamById(id);
+        if (team && team.name) {
+          return team.name;
+        }
+        const color = colorById(id);
+        return color ? color.label : id;
+      }
+
+      function secondsLeft() {
+        if (!roomState || !roomState.winner || !roomState.lockedAt || !roomState.now) {
+          return null;
+        }
+        const elapsed = (roomState.now - roomState.lockedAt) + (Date.now() - roomState.receivedAt);
+        return Math.max(0, (ANSWER_MS - elapsed) / 1000);
+      }
+
+      function ensureClock() {
+        if (clockTimer || !roomState || !roomState.winner || !roomState.lockedAt) {
+          return;
+        }
+        if (secondsLeft() <= 0) {
+          return;
+        }
+        clockTimer = setInterval(function () {
+          if (!roomState || !roomState.winner || !roomState.lockedAt) {
+            clearInterval(clockTimer);
+            clockTimer = null;
+            return;
+          }
+          renderBuzzLock();
+          if (secondsLeft() <= 0) {
+            clearInterval(clockTimer);
+            clockTimer = null;
+          }
+        }, 200);
+      }
+
+      function renderBuzzLock() {
+        const state = roomState;
+        const banner = document.getElementById("buzz-lock");
+        const clock = document.getElementById("buzz-clock");
+        const title = banner.querySelector("strong");
+        const note = banner.querySelector("[data-buzz-note]");
+        const roster = document.getElementById("buzz-roster");
+        const buzzQr = document.getElementById("buzz-qr");
+        if (!state || !teams.length) {
+          banner.hidden = true;
+          buzzQr.hidden = true;
+          return;
+        }
+        const taken = Array.isArray(state.taken) ? state.taken : [];
+        const out = Array.isArray(state.out) ? state.out : [];
+        const waitingForTeams = teams.some(function (team) {
+          return taken.indexOf(team.id) === -1;
+        });
+        if (state.winner !== buzzWinner) {
+          buzzWinner = state.winner;
+          if (state.winner) {
+            console.log("[Buzz] " + displayColor(state.winner));
+          }
+        }
+        if (!state.winner && !state.armed && !taken.length && !out.length) {
+          banner.hidden = true;
+          buzzQr.hidden = true;
+          return;
+        }
+        banner.hidden = false;
+        buzzQr.hidden = !!state.winner || !waitingForTeams;
+        banner.classList.toggle("can-reopen", !!state.winner);
+        const parts = [];
+        if (taken.length) {
+          parts.push("In: " + taken.map(displayColor).join(", "));
+        }
+        if (out.length) {
+          parts.push("Out: " + out.map(displayColor).join(", "));
+        }
+        roster.textContent = parts.join(" · ");
+        if (state.winner) {
+          const color = colorById(state.winner);
+          banner.style.background = color ? color.hex : "#111";
+          banner.style.color = color ? inkFor(color.hex) : "#fff";
+          title.textContent = displayColor(state.winner) + " buzzed";
+          const left = secondsLeft();
+          clock.hidden = left === null;
+          clock.textContent = left > 0 ? String(Math.ceil(left)) : "Time";
+          note.textContent = "Click or press R to reopen";
+          ensureClock();
+          return;
+        }
+        clock.hidden = true;
+        banner.style.background = "#111";
+        banner.style.color = "#ffcc00";
+        title.textContent = state.armed ? "Buzzers open" : "Buzzers";
+        note.textContent = state.armed && !taken.length ? "No buzzers joined yet" : "";
+      }
+
+      document.getElementById("buzz-lock").addEventListener("click", function () {
+        if (roomState && roomState.winner) {
+          window.resetBuzz();
+        }
+      });
+
+      window.resetBuzz = function () {
+        sendRoom({ type: "reset" });
+      };
 
       function hashText(text) {
         var hash = 0;

@@ -1,26 +1,26 @@
-# Custom Jeopardy
+# Quizgrid
 
-A Jeopardy board that runs in Chrome. The game page is `index.html`. The clues are in `board.txt`.
+A category board that runs in Chrome. The game page is `index.html`. The clues are in `board.txt`.
 
 ## Which copy to download
 
 | Branch | Board | Use it for |
 | --- | --- | --- |
-| [`main`](https://github.com/The-Allsparks/custom-jeopardy/tree/main) | Classroom Jeopardy | Science, history, and other school topics |
-| [`ftc-biobuzz`](https://github.com/The-Allsparks/custom-jeopardy/tree/ftc-biobuzz) | FTC BIOBUZZ | 2026–2027 FIRST Tech Challenge review |
+| [`main`](https://github.com/The-Allsparks/quizgrid/tree/main) | Classroom Jeopardy | Science, history, and other school topics |
+| [`ftc-biobuzz`](https://github.com/The-Allsparks/quizgrid/tree/ftc-biobuzz) | FTC BIOBUZZ | 2026–2027 FIRST Tech Challenge review |
 
 Download the branch you want:
 
-- Classroom: https://github.com/The-Allsparks/custom-jeopardy/archive/refs/heads/main.zip
-- BIOBUZZ: https://github.com/The-Allsparks/custom-jeopardy/archive/refs/heads/ftc-biobuzz.zip
+- Classroom: https://github.com/The-Allsparks/quizgrid/archive/refs/heads/main.zip
+- BIOBUZZ: https://github.com/The-Allsparks/quizgrid/archive/refs/heads/ftc-biobuzz.zip
 
 Unzip the folder. Open `index.html` in Chrome. Keep `index.html` and `board.txt` in the same folder. The page on GitHub will not run the game; it has to be opened from the downloaded folder.
 
 If you use git:
 
 ```
-git clone https://github.com/The-Allsparks/custom-jeopardy.git
-cd custom-jeopardy
+git clone https://github.com/The-Allsparks/quizgrid.git
+cd quizgrid
 git switch ftc-biobuzz
 ```
 
@@ -29,15 +29,17 @@ Leave off the last line to stay on the classroom board.
 ## Play a game
 
 1. Open `index.html` in Chrome.
-2. Jeopardy deals 6 categories. Double Jeopardy deals 6 different ones. Each column shows 5 clues, easier at the top and harder at the bottom.
+2. Round 1 deals 6 categories. Round 2 deals 6 different ones. Each column shows 5 clues, easier at the top and harder at the bottom.
 3. Click a value. The answer appears, and players respond with a question.
 4. Click the screen, or press Enter or Space, to show the question.
 5. Click again to return to the board. That clue stays dark.
-6. When every Jeopardy clue has been played, Double Jeopardy opens on its own.
+6. When every Round 1 clue has been played, a Round 2 card appears. Click it to deal the next board. After the last clue, the final scores fill the screen.
+
+On the answer screen, Escape puts that clue back on the board. Enter, Space, or a click still moves ahead.
+
+The menu's Judge window shows the response on your laptop while the projector stays on the board. The response is also printed in the console on a line that starts with `[Judge]`.
 
 Refreshing the page keeps the current game. Closing the tab and opening the page again deals a new board. Click the title and confirm to deal a new game now.
-
-While the answer is on screen, the question is also printed in the browser console. Press F12, open Console, and read the line that starts with `[Judge]`.
 
 ## Keep score
 
@@ -48,13 +50,23 @@ Open the menu at the top right. Credits introduces The Allsparks, FTC team 36117
 - Scores show in the header.
 - On a clue, **+** adds that clue's value and moves ahead one step. **−** subtracts that value and stays on the screen.
 
-Teams stay in this browser. A new deal sets every score back to zero and keeps the teams.
+Teams stay in this browser. A new deal sets every score back to zero and keeps the teams. The leader's score is outlined in gold.
+
+## Host a room
+
+Buzzers and the judge window run on the hosted board. A copy opened from a folder still keeps score on the projector.
+
+Add at least two teams. A buzzer QR code appears. Each phone joins that room, types a short team name, and picks a color. The name shows on the score bar and on the buzz banner.
+
+The first buzz locks the other phones and starts a five-second clock. The clock does not change the score. Click the banner, or press R, to reopen the buzzers. While a team still needs a phone, that banner shows the buzzer QR code. A wrong answer locks that team out until the next clue. The banner lists who has joined and who is already out.
+
+Judge window, in the menu, opens the response and the score buttons beside the projector. While that window is open, the board hides the + and − buttons.
 
 ## Music
 
-Think music plays while the answer is on screen when `Jeopardy - 1997 - Think Music.mp3` sits next to `index.html`. That file is not in this repository. When it is missing, the menu links to the track on the Internet Archive: [Jeopardy - 1997 - Think Music](https://archive.org/details/tvtunes_29826).
+Think music plays while the answer is on screen. A file named `think.mp3` next to `index.html` is used when you have it. That file is not in this repository. The hosted board plays the Internet Archive copy instead: [Jeopardy - 1997 - Think Music](https://archive.org/details/tvtunes_29826).
 
-Turn music off in the menu, or press M, when the local file is present. The board still works if the music cannot play.
+Turn music off in the menu, or press M. The board still works if the music cannot play. If neither copy can play, the menu links to the Archive page.
 
 ## Edit the clues
 
@@ -72,15 +84,15 @@ Another answer | Another question
 - Each clue is `answer | question`, with a space, a pipe, and a space between the parts.
 - Put easier clues first and harder clues last.
 - Use at least 15 clues in a category. More than 15 is fine. With 15 clues, the five dollar values draw from clues 1–3, 4–6, 7–9, 10–12, and 13–15. A longer list stretches those same five bands across every clue.
-- Use at least 12 categories so both rounds can fill 6 columns. With fewer categories, Double Jeopardy uses whatever is left. With 6 or fewer, only Jeopardy is dealt.
+- Use at least 12 categories so both rounds can fill 6 columns. With fewer categories, Round 2 uses whatever is left. With 6 or fewer, only Round 1 is dealt.
 - Lines starting with `#` are comments.
 - A dollar amount at the start of a line is ignored. `200 | answer | question` is read as `answer | question`. The board assigns the dollar values from where the clue sits in the list.
-- An optional source is shown on the question page: `answer | question | citation | https://link`
+- An optional source is shown on the question page and on each buzzer: `answer | question | citation | https://link`
 
 Save the file, then refresh Chrome. Changing `board.txt` starts a fresh deal.
 
 ## GitHub
 
-Repository: https://github.com/The-Allsparks/custom-jeopardy
+Repository: https://github.com/The-Allsparks/quizgrid
 
 `main` holds the game page and the classroom board. `ftc-biobuzz` is that same page plus the BIOBUZZ board. Edit `board.txt` on the branch you want to change, then push that branch.
