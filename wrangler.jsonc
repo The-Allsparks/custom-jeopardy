@@ -1,10 +1,10 @@
 /**
- * BIOBUZZ Jeopardy board plus a room-coded buzzer.
+ * Quizgrid board plus a room-coded buzzer.
  * Production branch is ftc-biobuzz.
  * Classroom clues stay on main and are not this Worker's production deploy.
  */
 {
-	"name": "custom-jeopardy",
+	"name": "quizgrid",
 	"main": "worker/room.js",
 	"compatibility_date": "2026-10-06",
 	"workers_dev": true,

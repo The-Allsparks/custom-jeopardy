@@ -1,4 +1,5 @@
 **/.git
+**/*.mp3
 **/.DS_Store
 **/.wrangler
 **/node_modules

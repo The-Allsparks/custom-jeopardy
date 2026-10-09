@@ -74,7 +74,7 @@ function cleanClue(value) {
 
 function publicSource(board) {
   const clue = board && board.clue;
-  if (!clue) {
+  if (!clue || clue.step !== "question") {
     return null;
   }
   const citation = clip(clue.citation, 200);

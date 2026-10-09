@@ -214,7 +214,7 @@
         { id: "white", label: "White", hex: "#f7f7f7" }
       ];
       const CODE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
-      const ANSWER_MS = 5000;
+      const ANSWER_MS = 10000;
       const params = new URLSearchParams(location.search);
       const roomCode = (params.get("room") || "").toUpperCase();
       const token = params.get("token") || "";
@@ -389,7 +389,13 @@
         if (current) {
           const round = state.board && state.board.round ? state.board.round + " · " : "";
           metaEl.textContent = round + current.category + " · " + String(current.value).replace(/^\$/, "");
-          privacyEl.textContent = current.step === "question" ? "Response is on the projector" : "Response is only on this screen";
+          if (state.winner && current.step === "answer") {
+            privacyEl.textContent = "Score this buzz with + or −";
+          } else if (current.step === "answer") {
+            privacyEl.textContent = "No buzz yet. Show the answer to finish with no points awarded.";
+          } else {
+            privacyEl.textContent = "Response is on the projector";
+          }
           answerEl.textContent = current.answer;
           responseEl.textContent = current.question;
           const href = safeUrl(current.url);
@@ -410,19 +416,17 @@
         } else {
           sourceEl.hidden = true;
         }
+        const buzzing = !!(state.winner && current && current.step === "answer");
         actionsEl.innerHTML = "";
-        if (current && current.step === "answer") {
-          actionsEl.appendChild(actionButton("Show response", { type: "action", action: "reveal" }));
+        if (current && current.step === "answer" && !buzzing) {
+          actionsEl.appendChild(actionButton("Show answer", { type: "action", action: "reveal" }));
           actionsEl.appendChild(actionButton("Put clue back", { type: "action", action: "dismiss" }));
         } else if (current && current.step === "question") {
           actionsEl.appendChild(actionButton("Back to board", { type: "action", action: "close" }));
         }
-        if (state.winner) {
-          actionsEl.appendChild(actionButton("Reopen buzzers", { type: "action", action: "reopen" }));
-        }
         scoresEl.innerHTML = "";
         const amount = current ? Number(current.amount) : 0;
-        const scoring = !!(current && current.step === "answer" && amount);
+        const scoring = !!(buzzing && amount);
         scoreRows().forEach(function (row) {
           const color = colorById(row.id);
           if (!color) {
@@ -439,7 +443,7 @@
           value.textContent = String(row.score);
           card.appendChild(name);
           card.appendChild(value);
-          if (scoring) {
+          if (scoring && (!buzzing || row.id === state.winner)) {
             const controls = document.createElement("div");
             controls.appendChild(scoreButton(ink, "+", amount, row.id));
             controls.appendChild(scoreButton(ink, "−", -amount, row.id));

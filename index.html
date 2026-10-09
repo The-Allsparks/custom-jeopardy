@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Jeopardy</title>
+  <title>Quizgrid</title>
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -697,10 +697,39 @@
     #overlay.question #overlay-text {
       color: var(--gold);
       width: auto;
-      max-width: none;
+      max-width: 92vw;
       font-size: 17.6vw;
-      line-height: 1.2;
+      line-height: 1.15;
       white-space: nowrap;
+    }
+
+    @media (max-width: 700px) {
+      #overlay {
+        gap: 12px;
+        padding: 3vh 4vw 9vh;
+        overflow: auto;
+      }
+
+      #overlay-text {
+        font-size: clamp(1.15rem, 5.4vw, 2.2rem);
+        line-height: 1.2;
+      }
+
+      #overlay.question {
+        gap: 8px;
+        padding: 2vh 4vw 8vh;
+      }
+
+      #overlay.question #overlay-text {
+        max-width: 92vw;
+        font-size: clamp(1.35rem, 7vw, 2.5rem);
+        white-space: normal;
+      }
+
+      #overlay-prompt {
+        font-size: clamp(0.95rem, 3.6vw, 1.2rem);
+        line-height: 1.25;
+      }
     }
 
     #overlay-hint {
@@ -990,7 +1019,7 @@
 </head>
 <body>
   <header>
-    <h1><button id="title" type="button" title="Deal a new game">Jeopardy</button></h1>
+    <h1><button id="title" type="button" title="Deal a new game">Quizgrid</button></h1>
     <div id="header-tools">
       <div id="score-bar" hidden></div>
       <div id="room" hidden>
@@ -1067,13 +1096,13 @@
         <li><a href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer">Internet Archive</a></li>
         <li><a href="https://www.televisiontunes.com/Jeopardy_-_1997_-_Think_Music.html" target="_blank" rel="noopener noreferrer">televisiontunes.com</a></li>
       </ul>
-      <p>When a clue includes a source, the citation and link appear on the question page and on each buzzer.</p>
-      <p class="first-credit" hidden>BIOBUZZ clues cite the <a href="https://ftc-resources.firstinspires.org/ftc/game/cm-html/BIOBUZZ%20Competition%20Manual%20-%20TU03.htm" target="_blank" rel="noopener noreferrer">BIOBUZZ Competition Manual, version TU03 (October 1, 2026)</a>. The previous TU02 HTML file now returns Access Denied. Posted Updates uses Team Updates 00 through 03, through October 1, 2026.</p>
+      <p>When a clue includes a source, the citation and link appear on the question page, and on each buzzer after the question is revealed.</p>
+      <p class="first-credit" hidden>BIOBUZZ clues cite the <a href="https://ftc-resources.firstinspires.org/ftc/game/cm-html" target="_blank" rel="noopener noreferrer">current BIOBUZZ Competition Manual HTML</a>. That address always opens the latest release and keeps the section anchor. Today that release is version TU04 (October 8, 2026). Posted Updates uses Team Updates 00 through 03, through October 1, 2026.</p>
       <h3>Repository</h3>
       <ul>
-        <li><a href="https://github.com/The-Allsparks/custom-jeopardy" target="_blank" rel="noopener noreferrer">custom-jeopardy on GitHub</a></li>
-        <li><a href="https://github.com/The-Allsparks/custom-jeopardy/tree/main" target="_blank" rel="noopener noreferrer">main — Classroom Jeopardy</a></li>
-        <li><a href="https://github.com/The-Allsparks/custom-jeopardy/tree/ftc-biobuzz" target="_blank" rel="noopener noreferrer">ftc-biobuzz — FTC BIOBUZZ</a></li>
+        <li><a href="https://github.com/The-Allsparks/quizgrid" target="_blank" rel="noopener noreferrer">Quizgrid on GitHub</a></li>
+        <li><a href="https://github.com/The-Allsparks/quizgrid/tree/main" target="_blank" rel="noopener noreferrer">main — Classroom Jeopardy</a></li>
+        <li><a href="https://github.com/The-Allsparks/quizgrid/tree/ftc-biobuzz" target="_blank" rel="noopener noreferrer">ftc-biobuzz — FTC BIOBUZZ</a></li>
       </ul>
     </div>
   </div>
@@ -1137,8 +1166,8 @@
       const CATEGORIES_PER_ROUND = 6;
       const CLUES_ON_BOARD = 5;
       const ROUND_PLAN = [
-        { name: "Jeopardy", values: ["200", "400", "600", "800", "1000"] },
-        { name: "Double Jeopardy", values: ["400", "800", "1200", "1600", "2000"] }
+        { name: "Round 1", values: ["200", "400", "600", "800", "1000"] },
+        { name: "Round 2", values: ["400", "800", "1200", "1600", "2000"] }
       ];
       const TEAM_COLORS = [
         { id: "red", label: "Red", hex: "#e11d2e" },
@@ -1170,13 +1199,13 @@
       let roomState = null;
       let clockTimer = null;
       let lastActionId = "";
-      const ANSWER_MS = 5000;
+      const ANSWER_MS = 10000;
       const ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       const musicLink = document.getElementById("music-link");
       const credits = document.getElementById("credits");
       const creditsOpen = document.getElementById("credits-open");
       const creditsClose = document.getElementById("credits-close");
-      const LOCAL_TRACK = encodeURI("Jeopardy - 1997 - Think Music.mp3");
+      const LOCAL_TRACK = encodeURI("think.mp3");
       const ARCHIVE_TRACK = "https://archive.org/download/tvtunes_29826/Jeopardy%20-%201997%20-%20Think%20Music.mp3";
       const thinkAudio = new Audio();
       thinkAudio.preload = "auto";
@@ -1184,9 +1213,25 @@
       let localTrackMissing = false;
       const trackReady = chooseThinkTrack();
 
+      let thinkPausedForBuzz = false;
+      let thinkFinishedDuringBuzz = false;
+      let ignoreThinkEnd = false;
+      let overlayAdvancing = false;
+
       thinkAudio.addEventListener("error", function () {
         localTrackMissing = true;
         updateSoundButtons();
+      });
+      thinkAudio.addEventListener("ended", function () {
+        thinkPausedForBuzz = false;
+        if (ignoreThinkEnd || !active || active.step !== "answer") {
+          return;
+        }
+        if (buzzPending()) {
+          thinkFinishedDuringBuzz = true;
+          return;
+        }
+        advanceOverlay();
       });
 
       titleEl.textContent = game.title;
@@ -1249,22 +1294,21 @@
       }, true);
 
       window.addEventListener("resize", function () {
-        if (active && active.step === "question") {
-          fitQuestionText();
-        }
+        fitOverlayType();
       });
 
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(function () {
-          if (active && active.step === "question") {
-            fitQuestionText();
-          }
+          fitOverlayType();
         });
       }
 
       overlayEl.addEventListener("click", function (event) {
         if (event.target.closest("#overlay-link") || event.target.closest("#award-bar")) {
           event.stopPropagation();
+          return;
+        }
+        if (buzzPending()) {
           return;
         }
         advanceOverlay();
@@ -1321,11 +1365,17 @@
           return;
         }
         if (event.key === "Escape" && active && active.step === "answer") {
+          if (buzzPending()) {
+            return;
+          }
           event.preventDefault();
           dismissClue();
           return;
         }
         if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
+          if (buzzPending()) {
+            return;
+          }
           event.preventDefault();
           advanceOverlay();
         }
@@ -1333,7 +1383,7 @@
 
       function parseBoard(text) {
         const categories = [];
-        let title = "Jeopardy";
+        let title = "Quizgrid";
         let current = null;
 
         String(text).split(/\r?\n/).forEach(function (raw) {
@@ -1860,7 +1910,9 @@
 
       function renderAwardBar() {
         awardBar.innerHTML = "";
-        const show = !!(active && active.step === "answer" && teams.length >= 2 && !(roomState && roomState.judge));
+        const liveRoom = !!(roomState && roomCode);
+        const buzzing = roomState && roomState.winner;
+        const show = !!(active && active.step === "answer" && teams.length >= 2 && !(roomState && roomState.judge) && (!liveRoom || buzzing));
         awardBar.hidden = !show;
         overlayEl.classList.toggle("has-awards", show);
         if (!show) {
@@ -1868,6 +1920,9 @@
         }
         const value = clueAmount(active.clue);
         teams.forEach(function (team) {
+          if (buzzing && team.id !== roomState.winner) {
+            return;
+          }
           const color = colorById(team.id);
           const ink = inkFor(color.hex);
           const group = document.createElement("div");
@@ -2066,8 +2121,10 @@
         overlayPrompt.textContent = "";
         hideSource();
         clearQuestionFit();
+        fitAnswerText();
         console.log("[Judge] " + clueMeta(category, clue) + "\n" + clue.question);
         overlayHint.textContent = "Click to continue. Esc puts it back.";
+        syncBuzzHint();
         renderAwardBar();
         startThinkMusic();
         sendRoom({ type: "arm", fresh: true });
@@ -2089,9 +2146,10 @@
       }
 
       function advanceOverlay() {
-        if (!active) {
+        if (!active || overlayAdvancing) {
           return;
         }
+        overlayAdvancing = true;
         stopThinkMusic();
         sendRoom({ type: "disarm" });
         if (active.step === "answer") {
@@ -2102,9 +2160,10 @@
           overlayText.textContent = active.clue.question;
           overlayHint.textContent = "Click to continue";
           showSource(active.clue);
-          fitQuestionText();
+          fitOverlayType();
           renderAwardBar();
           publishBoard();
+          overlayAdvancing = false;
           return;
         }
         hideSource();
@@ -2121,6 +2180,7 @@
           renderAll();
           showRoundCard();
           publishBoard();
+          overlayAdvancing = false;
           return;
         }
         renderAll();
@@ -2128,11 +2188,17 @@
           showFinalCard();
         }
         publishBoard();
+        overlayAdvancing = false;
+      }
+
+      function roundLabel(index) {
+        const plan = ROUND_PLAN[index];
+        return plan && plan.name ? plan.name : "Round " + (index + 1);
       }
 
       function showRoundCard() {
         momentKicker.textContent = "Next round";
-        momentTitle.textContent = game.rounds[roundIndex].name;
+        momentTitle.textContent = roundLabel(roundIndex);
         momentStandings.hidden = true;
         momentStandings.innerHTML = "";
         momentHint.textContent = "Click to start";
@@ -2206,13 +2272,103 @@
         overlayLink.removeAttribute("title");
       }
 
+      function fitLimit() {
+        var limit = overlayHint.getBoundingClientRect().top - 16;
+        if (awardBar && !awardBar.hidden) {
+          var awardTop = awardBar.getBoundingClientRect().top;
+          if (awardTop > 0 && awardTop < limit) {
+            limit = awardTop - 12;
+          }
+        }
+        if (window.getComputedStyle(overlayLink).display !== "none") {
+          var linkTop = overlayLink.getBoundingClientRect().top;
+          if (linkTop > 0 && linkTop < limit) {
+            limit = linkTop - 12;
+          }
+        }
+        return limit;
+      }
+
+      function pastLimit() {
+        var limit = fitLimit();
+        var nodes = [overlayMeta, overlayPrompt.parentElement, overlayLabel, overlayText];
+        for (var i = 0; i < nodes.length; i++) {
+          var node = nodes[i];
+          if (!node || node.hidden) {
+            continue;
+          }
+          var style = window.getComputedStyle(node);
+          if (style.display === "none" || style.visibility === "hidden") {
+            continue;
+          }
+          if (node.getBoundingClientRect().bottom > limit) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function largestFit(node, floor, ceiling) {
+        floor = Math.floor(floor);
+        ceiling = Math.max(floor, Math.floor(ceiling));
+        node.style.fontSize = ceiling + "px";
+        if (!pastLimit()) {
+          return;
+        }
+        var low = floor;
+        var high = ceiling - 1;
+        var best = floor;
+        while (low <= high) {
+          var mid = Math.floor((low + high) / 2);
+          node.style.fontSize = mid + "px";
+          if (!pastLimit()) {
+            best = mid;
+            low = mid + 1;
+          } else {
+            high = mid - 1;
+          }
+        }
+        node.style.fontSize = best + "px";
+      }
+
+      function capPrompt(tight) {
+        if (!overlayPrompt.textContent) {
+          return;
+        }
+        var maxHeight = overlayEl.clientHeight * (tight ? 0.18 : 0.26);
+        var floor = window.innerWidth < 700 ? 13 : 20;
+        var size = parseFloat(window.getComputedStyle(overlayPrompt).fontSize);
+        var guard = 0;
+        if (!size) {
+          return;
+        }
+        while (size > floor && overlayPrompt.getBoundingClientRect().height > maxHeight && guard < 24) {
+          size = Math.max(floor, Math.floor(size * 0.88));
+          overlayPrompt.style.fontSize = size + "px";
+          guard += 1;
+        }
+      }
+
+      function fitAnswerText() {
+        overlayText.style.fontSize = "";
+        overlayText.style.width = "";
+        overlayText.style.maxWidth = "";
+        overlayText.style.whiteSpace = "";
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        var computed = parseFloat(window.getComputedStyle(overlayText).fontSize) || 48;
+        var floor = window.innerWidth < 700 ? 16 : 24;
+        largestFit(overlayText, floor, computed);
+      }
+
       function fitQuestionText() {
         if (!active || active.step !== "question") {
           clearQuestionFit();
           return;
         }
-        var target = Math.floor(window.innerWidth * 0.77);
-        var heightCap = Math.floor(window.innerHeight * 0.34);
+        overlayPrompt.style.fontSize = "";
+        var target = Math.floor(overlayEl.clientWidth * 0.9);
         overlayText.style.whiteSpace = "nowrap";
         overlayText.style.width = "auto";
         overlayText.style.maxWidth = "none";
@@ -2221,25 +2377,34 @@
         if (!measured) {
           return;
         }
-        var size = Math.floor((100 * target) / measured);
-        var heightAtSize = overlayText.scrollHeight * (size / 100);
-        if (heightAtSize > heightCap) {
-          size = Math.floor(size * heightCap / heightAtSize);
+        var oneLine = Math.floor((100 * target) / measured);
+        var maxLine = Math.floor(overlayEl.clientHeight * 0.38);
+        if (oneLine > maxLine) {
+          oneLine = maxLine;
         }
-        var minHuge = Math.max(77, Math.floor(window.innerWidth * 0.096));
-        if (size < minHuge) {
-          overlayText.style.whiteSpace = "normal";
-          overlayText.style.width = target + "px";
-          overlayText.style.maxWidth = target + "px";
-          size = Math.min(Math.floor(window.innerWidth * 0.112), heightCap);
-          overlayText.style.fontSize = size + "px";
-          while (size > 64 && overlayText.scrollHeight > heightCap) {
-            size -= 4;
-            overlayText.style.fontSize = size + "px";
-          }
+        capPrompt(false);
+        overlayText.style.fontSize = oneLine + "px";
+        if (!pastLimit()) {
           return;
         }
-        overlayText.style.fontSize = size + "px";
+        overlayText.style.whiteSpace = "normal";
+        overlayText.style.width = target + "px";
+        overlayText.style.maxWidth = target + "px";
+        capPrompt(true);
+        var floor = window.innerWidth < 700 ? 16 : 24;
+        var ceiling = Math.max(floor, Math.floor(overlayEl.clientHeight * 0.16));
+        largestFit(overlayText, floor, ceiling);
+      }
+
+      function fitOverlayType() {
+        if (!active || !overlayEl.classList.contains("open")) {
+          return;
+        }
+        if (active.step === "question") {
+          fitQuestionText();
+          return;
+        }
+        fitAnswerText();
       }
 
       function clearQuestionFit() {
@@ -2247,11 +2412,12 @@
         overlayText.style.width = "";
         overlayText.style.maxWidth = "";
         overlayText.style.whiteSpace = "";
+        overlayPrompt.style.fontSize = "";
       }
 
       function clueMeta(category, clue) {
         const valueLabel = String(clue.value).replace(/^\$/, "");
-        const roundName = game.rounds.length > 1 ? game.rounds[roundIndex].name + "  •  " : "";
+        const roundName = game.rounds.length > 1 ? roundLabel(roundIndex) + "  •  " : "";
         return roundName + category.name + "  •  " + valueLabel;
       }
 
@@ -2364,18 +2530,22 @@
             return;
           }
           const begin = function () {
+            if (!active || active.step !== "answer") {
+              return;
+            }
+            ignoreThinkEnd = true;
             thinkAudio.pause();
             try {
               thinkAudio.currentTime = 0;
             } catch (error) {
               // Metadata may not be ready on the first play.
             }
-            const pending = thinkAudio.play();
-            if (pending && typeof pending.catch === "function") {
-              pending.catch(function () {
-                // Playback can fail if the browser blocks it. The board still works.
-              });
+            ignoreThinkEnd = false;
+            if (buzzPending()) {
+              thinkPausedForBuzz = true;
+              return;
             }
+            playThinkMusic();
           };
           if (thinkAudio.readyState >= 1) {
             begin();
@@ -2385,13 +2555,74 @@
         });
       }
 
+      function playThinkMusic() {
+        if (muted || localTrackMissing || !thinkAudio.src) {
+          return;
+        }
+        const pending = thinkAudio.play();
+        if (pending && typeof pending.catch === "function") {
+          pending.catch(function () {
+            // Playback can fail if the browser blocks it. The board still works.
+          });
+        }
+      }
+
       function stopThinkMusic() {
+        thinkPausedForBuzz = false;
+        thinkFinishedDuringBuzz = false;
+        ignoreThinkEnd = true;
         thinkAudio.pause();
         try {
           thinkAudio.currentTime = 0;
         } catch (error) {
           // Ignore if the file has not loaded yet.
         }
+        ignoreThinkEnd = false;
+      }
+
+      function buzzPending() {
+        return !!(active && active.step === "answer" && roomState && roomState.winner);
+      }
+
+      function everyTeamOut() {
+        if (!active || active.step !== "answer" || !teams.length || !roomState) {
+          return false;
+        }
+        const out = Array.isArray(roomState.out) ? roomState.out : [];
+        return teams.every(function (team) {
+          return out.indexOf(team.id) !== -1;
+        });
+      }
+
+      function syncBuzzHint() {
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        overlayHint.textContent = buzzPending() ? "Score the buzz" : "Click to continue. Esc puts it back.";
+      }
+
+      function syncThinkMusic() {
+        if (!active || active.step !== "answer") {
+          return;
+        }
+        if (buzzPending()) {
+          if (!thinkAudio.paused && !thinkAudio.ended) {
+            thinkPausedForBuzz = true;
+            thinkAudio.pause();
+          }
+          return;
+        }
+        if (thinkFinishedDuringBuzz) {
+          thinkPausedForBuzz = false;
+          thinkFinishedDuringBuzz = false;
+          advanceOverlay();
+          return;
+        }
+        if (!thinkPausedForBuzz) {
+          return;
+        }
+        thinkPausedForBuzz = false;
+        playThinkMusic();
       }
 
       function loadRoundIndex() {
@@ -2515,6 +2746,12 @@
             applyRoomNames(data.names);
             renderBuzzLock();
             renderAwardBar();
+            syncBuzzHint();
+            if (everyTeamOut()) {
+              advanceOverlay();
+              return;
+            }
+            syncThinkMusic();
           }
         });
         socket.addEventListener("close", function () {
@@ -2620,7 +2857,7 @@
           type: "board",
           clue: clue,
           scores: scores,
-          round: game.rounds[roundIndex] ? game.rounds[roundIndex].name : ""
+          round: game.rounds[roundIndex] ? roundLabel(roundIndex) : ""
         });
       }
 
@@ -2638,6 +2875,9 @@
           if (!teamById(data.color) || !amount || (delta !== amount && delta !== -amount)) {
             return;
           }
+          if (buzzPending() && data.color !== roomState.winner) {
+            return;
+          }
           adjustScore(data.color, delta);
           if (delta < 0) {
             sendRoom({ type: "miss", color: data.color });
@@ -2650,6 +2890,9 @@
           return;
         }
         if (data.action === "reveal" && active && active.step === "answer") {
+          if (buzzPending()) {
+            return;
+          }
           advanceOverlay();
           return;
         }
@@ -2658,10 +2901,16 @@
           return;
         }
         if (data.action === "dismiss") {
+          if (buzzPending()) {
+            return;
+          }
           dismissClue();
           return;
         }
         if (data.action === "reopen") {
+          if (buzzPending()) {
+            return;
+          }
           window.resetBuzz();
         }
       }
