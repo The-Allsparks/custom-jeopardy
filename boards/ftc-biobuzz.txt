@@ -1,5 +1,5 @@
 // ============================================================
-// JEOPARDY BOARD — this is the file you edit
+// QUIZGRID BOARD — this is the file you edit
 // This is a .txt file so it can be emailed.
 // Leave the first "const BOARD =" line and the last `; line as they are.
 // ============================================================

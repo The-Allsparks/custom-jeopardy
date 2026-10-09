@@ -1,0 +1,469 @@
+// ============================================================
+// QUIZGRID BOARD — this is the file you edit
+// This is a .txt file so it can be emailed.
+// Leave the first "const BOARD =" line and the last `; line as they are.
+// ============================================================
+//
+// How to write clues:
+//   TITLE: Your Game Name
+//
+//   CATEGORY: Category Name
+//   The answer shown first | The question shown second
+//   Another answer | Another question
+//
+// Rules:
+//   - One category per "CATEGORY:" line
+//   - Each clue is:  answer | question
+//   - Use a space, a pipe (|), and a space between the two parts
+//   - Put easier clues first and harder clues last
+//   - Aim for 15 clues in each category
+//   - Lines starting with # are comments and are ignored
+//   - You can still write:  value | answer | question
+//     The dollar value is ignored. Order in the list is what matters.
+//
+// What the game deals each time:
+//   - Round 1 gets 6 random categories
+//   - Round 2 gets 6 different random categories
+//   - Each column shows 5 clues
+//   - Those 5 are chosen one from each difficulty band:
+//       clues 1–3   → lowest dollar value
+//       clues 4–6
+//       clues 7–9
+//       clues 10–12
+//       clues 13–15 → highest dollar value
+//   - Refresh keeps the current game
+//   - "Reset" deals a new board
+//   - Closing the tab and opening the page again also deals a new board
+//   - Editing this file starts a fresh deal
+//
+// After you save this file, refresh the page in Chrome.
+// ============================================================
+
+const BOARD = `
+TITLE: Classroom
+
+CATEGORY: Science
+This planet is closest to the Sun | What is Mercury?
+H2O is the chemical formula for this | What is water?
+This force pulls objects toward Earth | What is gravity?
+People breathe in this gas to stay alive | What is oxygen?
+At 32 degrees Fahrenheit, water becomes this solid | What is ice?
+This gas makes up about 78 percent of Earth's atmosphere | What is nitrogen?
+Plants make food from sunlight in this process | What is photosynthesis?
+This scientist described three laws of motion | Who is Isaac Newton?
+This is the dense center of an atom | What is the nucleus?
+This cell part is often called the powerhouse of the cell | What is the mitochondrion?
+This scale measures how acidic or basic a substance is | What is the pH scale?
+This state of matter has a definite volume but takes the shape of its container | What is a liquid?
+This negatively charged particle orbits an atom's nucleus | What is an electron?
+DNA is short for this acid | What is deoxyribonucleic acid?
+This law says energy cannot be created or destroyed, only changed in form | What is conservation of energy?
+
+CATEGORY: Geography
+This is the largest country in the world by land area | What is Russia?
+Paris is the capital of this country | What is France?
+This country is home to the Great Wall | What is China?
+This is the largest continent | What is Asia?
+This mountain is the tallest above sea level | What is Mount Everest?
+This is the world's largest hot desert | What is the Sahara?
+This line circles Earth halfway between the North and South Poles | What is the equator?
+This U.S. state has the biggest area | What is Alaska?
+This country is shaped like a boot | What is Italy?
+Most of the Amazon rainforest is in this country | What is Brazil?
+This canal links the Atlantic and Pacific Oceans | What is the Panama Canal?
+This is the smallest continent | What is Australia?
+This mountain range runs along the west side of South America | What are the Andes?
+This is the deepest lake in the world | What is Lake Baikal?
+This strait separates Spain from Morocco | What is the Strait of Gibraltar?
+
+CATEGORY: U.S. History
+He was the first president of the United States | Who is George Washington?
+This document begins with the words "We the People" | What is the Constitution?
+The Declaration of Independence was adopted in this year | What is 1776?
+This war was fought between the North and the South | What is the Civil War?
+She refused to give up her bus seat in Montgomery | Who is Rosa Parks?
+This 1803 land deal doubled the size of the country | What is the Louisiana Purchase?
+He wrote the Declaration of Independence | Who is Thomas Jefferson?
+This ship brought the Pilgrims to Plymouth in 1620 | What is the Mayflower?
+She was the first woman to fly solo across the Atlantic | Who is Amelia Earhart?
+He gave the Gettysburg Address | Who is Abraham Lincoln?
+This amendment gave women the right to vote | What is the 19th Amendment?
+Colonists dumped this drink into Boston Harbor to protest a tax | What is tea?
+This 1954 Supreme Court case ruled school segregation unconstitutional | What is Brown v. Board of Education?
+This war was fought by the United States in Southeast Asia in the 1960s and 1970s | What is the Vietnam War?
+This nickname mocked the 1867 purchase of Alaska | What is Seward's Folly?
+
+CATEGORY: World History
+The pyramids at Giza were built in this country | What is Egypt?
+This wall divided the city of Berlin from 1961 to 1989 | What is the Berlin Wall?
+Gladiators fought in this famous Roman arena | What is the Colosseum?
+His expedition's ships were the first to sail around the world | Who is Ferdinand Magellan?
+She was the last active ruler of Egypt's Ptolemaic Kingdom | Who is Cleopatra?
+Mount Vesuvius buried this Roman city in ash | What is Pompeii?
+This 1215 charter limited the power of the English king | What is the Magna Carta?
+She was burned at the stake in Rouen in 1431 after leading French soldiers | Who is Joan of Arc?
+This ancient lighthouse stood in the harbor of Alexandria | What is the Pharos?
+This empire, defeated by Cortés, was centered in what is now Mexico | What is the Aztec Empire?
+World War II ended in this year | What is 1945?
+Sayings of this Chinese teacher were collected in the Analects | Who is Confucius?
+The Renaissance began in this Italian city | What is Florence?
+This disease swept Europe in the 1300s and is called the Black Death | What is the bubonic plague?
+The Parthenon stands on this rocky hill above Athens | What is the Acropolis?
+
+CATEGORY: Math
+2 plus 2 equals this | What is 4?
+A triangle has this many sides | What is 3?
+A dozen is this many | What is 12?
+A hexagon has this many sides | What is 6?
+A right angle measures this many degrees | What is 90?
+7 times 8 equals this | What is 56?
+The angles inside a triangle add up to this many degrees | What is 180?
+This is the square root of 81 | What is 9?
+Pi rounded to two decimal places is this | What is 3.14?
+This shape has eight sides | What is an octagon?
+A square with sides of length 5 has this perimeter | What is 20?
+10 squared equals this | What is 100?
+This is the only even prime number | What is 2?
+A whole number greater than 1 that is not prime is called this | What is a composite number?
+In a fraction, the bottom number is called this | What is the denominator?
+
+CATEGORY: Animals
+This animal is often called a person's best friend | What is a dog?
+This insect makes honey | What is a honeybee?
+This black and white animal eats bamboo | What is a giant panda?
+A baby frog is called this | What is a tadpole?
+This African animal is famous for its long neck | What is a giraffe?
+This is the fastest land animal | What is the cheetah?
+This is the largest animal alive today | What is the blue whale?
+A group of lions is called this | What is a pride?
+This flightless bird lives in Antarctica | What is a penguin?
+An octopus has this many arms | What is 8?
+This flying mammal finds its way by echolocation | What is a bat?
+This is the only bird that can fly backwards | What is a hummingbird?
+This egg-laying mammal has a bill like a duck | What is a platypus?
+A shark's skeleton is made of this flexible material | What is cartilage?
+This is the largest living big cat | What is the tiger?
+
+CATEGORY: Space
+People live on this planet | What is Earth?
+This is Earth's natural satellite | What is the Moon?
+This is the closest star to Earth | What is the Sun?
+This planet is known for its bright rings | What is Saturn?
+This is the largest planet in the solar system | What is Jupiter?
+This is the farthest planet from the Sun | What is Neptune?
+This red planet is named for the Roman god of war | What is Mars?
+He was the first person to walk on the Moon | Who is Neil Armstrong?
+Our solar system sits inside this galaxy | What is the Milky Way?
+This dwarf planet was reclassified in 2006 | What is Pluto?
+This space telescope was launched in 1990 | What is Hubble?
+This is the hottest planet, even though it is not closest to the Sun | What is Venus?
+A light-year measures this | What is distance?
+This is the path a planet follows around the Sun | What is an orbit?
+This streak of light appears when a space rock burns up in the atmosphere | What is a meteor?
+
+CATEGORY: Art
+This tool is used to spread paint on a canvas | What is a brush?
+Mixing red and yellow paint makes this color | What is orange?
+The primary colors of paint are red, yellow, and this | What is blue?
+A painting of a person is called this | What is a portrait?
+"The Starry Night" was painted by this artist | Who is Vincent van Gogh?
+He painted the Mona Lisa | Who is Leonardo da Vinci?
+This museum in Paris displays the Mona Lisa | What is the Louvre?
+He painted the ceiling of the Sistine Chapel | Who is Michelangelo?
+She painted many self-portraits and was married to Diego Rivera | Who is Frida Kahlo?
+Art made from small pieces of colored glass or stone is called this | What is a mosaic?
+This Japanese art uses folded paper | What is origami?
+This Spanish artist painted "Guernica" | Who is Pablo Picasso?
+This art movement, including Monet, focused on light and everyday scenes | What is Impressionism?
+This technique uses tiny dots of color that blend when seen from far away | What is pointillism?
+This Spanish artist painted melting clocks in "The Persistence of Memory" | Who is Salvador Dalí?
+
+CATEGORY: Music
+This instrument has 88 keys | What is the piano?
+This string instrument is held under the chin and played with a bow | What is the violin?
+To play this instrument, you blow across a hole and press keys | What is the flute?
+In 4/4 time, this note lasts for one beat | What is a quarter note?
+He wrote the "Moonlight Sonata" | Who is Beethoven?
+This clef marks higher notes at the start of a staff | What is the treble clef?
+This brass instrument is played with a slide | What is the trombone?
+A group of four musicians is called this | What is a quartet?
+He wrote "The Four Seasons" | Who is Vivaldi?
+This is the word for the speed of a piece of music | What is tempo?
+He wrote the opera "The Magic Flute" | Who is Mozart?
+This major scale has no sharps or flats | What is C major?
+This Italian word tells a musician to play fast | What is allegro?
+He wrote the ballet "The Nutcracker" | Who is Tchaikovsky?
+This term means a note should be held smoothly for its full length | What is legato?
+
+CATEGORY: Books & Stories
+This boy wizard attends Hogwarts | Who is Harry Potter?
+In this fairy tale, a girl meets a wolf on the way to her grandmother's house | What is Little Red Riding Hood?
+This hobbit carries the One Ring toward Mordor | Who is Frodo?
+This green ogre is the hero of a popular animated movie | Who is Shrek?
+This spider writes words in her web to save a pig | Who is Charlotte?
+He wrote "A Christmas Carol" | Who is Charles Dickens?
+This girl falls down a rabbit hole into a strange world | Who is Alice?
+This detective lives at 221B Baker Street | Who is Sherlock Holmes?
+He wrote "The Cat in the Hat" | Who is Dr. Seuss?
+She wrote the Harry Potter books | Who is J.K. Rowling?
+He wrote "Romeo and Juliet" | Who is William Shakespeare?
+In "The Lion, the Witch and the Wardrobe," the children enter Narnia through this | What is a wardrobe?
+He created Winnie-the-Pooh | Who is A.A. Milne?
+"To be, or not to be" is a line from this play | What is Hamlet?
+This novel begins with the line "Call me Ishmael" | What is Moby-Dick?
+
+CATEGORY: Word Play
+A synonym for "happy" that starts with J | What is joyful?
+This punctuation mark ends a question | What is a question mark?
+"Listen" is an anagram of this word | What is silent?
+A word spelled the same forward and backward, such as "kayak," is called this | What is a palindrome?
+This figure of speech compares two things using "like" or "as" | What is a simile?
+This figure of speech says one thing is another, such as "time is money" | What is a metaphor?
+A word that means the opposite of another word is called this | What is an antonym?
+"Their," "there," and "they're" are this kind of sound-alike | What are homophones?
+"Buzz" and "bang" imitate sounds and are examples of this | What is onomatopoeia?
+This punctuation mark can join two closely related sentences | What is a semicolon?
+The "un-" in "unhappy" is this kind of word part | What is a prefix?
+Giving human traits to something that is not human is called this | What is personification?
+Three dots that show words were left out are called this | What is an ellipsis?
+"Biggest" is this form of the adjective "big" | What is the superlative?
+An extreme exaggeration, such as "I could eat a horse," is called this | What is hyperbole?
+
+CATEGORY: Inventions
+Alexander Graham Bell is credited with inventing this | What is the telephone?
+He is credited with a practical electric light bulb | Who is Thomas Edison?
+The Wright brothers made the first airplane flight in this state | What is North Carolina?
+Telegraph messages were sent in this code of dots and dashes | What is Morse code?
+He developed the vaccine that prevents polio | Who is Jonas Salk?
+Johannes Gutenberg is famous for this machine that printed books | What is the printing press?
+This appliance cooks food with radio waves | What is a microwave oven?
+Tim Berners-Lee invented this worldwide system of linked pages | What is the World Wide Web?
+This navigation tool has a needle that points north | What is a compass?
+Eli Whitney's cotton engine is better known by this name | What is the cotton gin?
+This English doctor developed the first successful smallpox vaccine | Who is Edward Jenner?
+She and George Antheil patented a frequency-hopping communication system | Who is Hedy Lamarr?
+This instrument measures air pressure | What is a barometer?
+This writing system uses raised dots so people can read by touch | What is Braille?
+This Scottish scientist discovered penicillin | Who is Alexander Fleming?
+
+CATEGORY: Sports
+This sport is played with a bat and a ball on a diamond | What is baseball?
+This sport uses a hoop and a ball you dribble | What is basketball?
+Each team has 11 players on the field in this sport | What is soccer?
+The ancient Olympic Games began in this country | What is Greece?
+In American football, the team that has the ball is called this | What is the offense?
+Wimbledon is a famous tournament in this sport | What is tennis?
+This footrace is 26.2 miles long | What is a marathon?
+In bowling, knocking down all ten pins with one roll is called this | What is a strike?
+A perfect score in bowling is this number | What is 300?
+In baseball, three strikes make this | What is an out?
+The Super Bowl decides the champion of this football league | What is the NFL?
+This American swimmer has won more Olympic gold medals than any other athlete | Who is Michael Phelps?
+This trophy goes to the champion of the National Hockey League | What is the Stanley Cup?
+A shuttlecock is hit over a net in this sport | What is badminton?
+This American gymnast won Olympic individual all-around gold in 2016 and 2024 | Who is Simone Biles?
+
+CATEGORY: Food
+Cartoon monkeys are often shown eating this yellow fruit | What is a banana?
+This round dish is made of dough, tomato sauce, and cheese | What is pizza?
+Churning cream makes this spread | What is butter?
+This breakfast drink is made by squeezing oranges | What is orange juice?
+Cutting this vegetable can make your eyes water | What is an onion?
+This Mexican dish is a folded or rolled tortilla with a filling | What is a taco?
+Sushi is served with this grain | What is rice?
+This fungus is often served on pizza | What is a mushroom?
+Bread, pasta, and many cereals are made from this grain | What is wheat?
+This pasta sauce is made mainly from tomatoes | What is tomato sauce?
+Chocolate is made from the bean of this plant | What is cacao?
+This expensive spice comes from a crocus flower | What is saffron?
+Heating milk to kill harmful germs is called this | What is pasteurization?
+This diet includes no meat, eggs, or dairy | What is a vegan diet?
+This chemical in chili peppers makes them taste hot | What is capsaicin?
+
+CATEGORY: The Human Body
+This organ pumps blood through the body | What is the heart?
+People see with these | What are the eyes?
+This bony frame supports the body | What is the skeleton?
+These organs fill with air when you breathe | What are the lungs?
+This organ lets you think and helps control the body | What is the brain?
+Adults usually have this many teeth, counting wisdom teeth | What is 32?
+This joint connects the thigh to the lower leg | What is the knee?
+This liquid carries oxygen through the body | What is blood?
+This is the body's largest organ | What is the skin?
+This bone protects the brain | What is the skull?
+These blood vessels carry blood away from the heart | What are arteries?
+The thigh bone is also called this | What is the femur?
+This acid in the stomach helps digest food | What is hydrochloric acid?
+These tiny air sacs in the lungs pass oxygen into the blood | What are alveoli?
+This system of glands sends messages using hormones | What is the endocrine system?
+
+CATEGORY: Weather
+Frozen flakes that fall from clouds are called this | What is snow?
+Water that falls from clouds in drops is called this | What is rain?
+This bright flash in a storm is followed by thunder | What is lightning?
+A light, gentle wind is called this | What is a breeze?
+This tool measures temperature | What is a thermometer?
+A scientist who studies the weather is called this | What is a meteorologist?
+A spinning funnel cloud over land is called this | What is a tornado?
+This season comes after winter | What is spring?
+The calm center of a hurricane is called this | What is the eye?
+This blanket of gases surrounds Earth | What is the atmosphere?
+This fluffy cloud looks like a pile of cotton | What is a cumulus cloud?
+Water vapor turning into liquid water is called this | What is condensation?
+On a weather map, this line connects places with the same air pressure | What is an isobar?
+This scale rates tornadoes from EF0 to EF5 | What is the Enhanced Fujita scale?
+This scale rates hurricanes from Category 1 to Category 5 | What is the Saffir-Simpson scale?
+
+CATEGORY: U.S. Government
+This city is the capital of the United States | What is Washington, D.C.?
+The president lives and works in this house | What is the White House?
+This branch of government makes the laws | What is the legislative branch?
+The Supreme Court belongs to this branch of government | What is the judicial branch?
+Delegates signed the Constitution in this city in 1787 | What is Philadelphia?
+The first ten amendments are called this | What is the Bill of Rights?
+This is the highest court in the United States | What is the Supreme Court?
+A change added to the Constitution is called this | What is an amendment?
+The president leads this branch of government | What is the executive branch?
+The vice president's constitutional duty is to preside over this chamber | What is the Senate?
+This chamber of Congress has 435 voting members | What is the House of Representatives?
+The president is commander in chief of these forces | What are the armed forces?
+This system lets each branch limit the power of the others | What are checks and balances?
+A proposed law is called this until Congress passes it | What is a bill?
+This amendment protects freedom of speech, religion, and the press | What is the First Amendment?
+
+CATEGORY: Myths & Legends
+This Greek god is shown with a thunderbolt | Who is Zeus?
+This hero could be wounded only in his heel | Who is Achilles?
+Greek Poseidon matches this Roman god of the sea | Who is Neptune?
+In the familiar story, she opened a box and released troubles into the world | Who is Pandora?
+The Minotaur was kept in this maze | What is the Labyrinth?
+This Norse god carries a hammer named Mjolnir | Who is Thor?
+He flew too close to the sun on wings of feathers and wax | Who is Icarus?
+Looking at this woman, who had snakes for hair, could turn a person to stone | Who is Medusa?
+This hero had to complete twelve labors | Who is Hercules?
+Jason sailed with the Argonauts on this ship | What is the Argo?
+She was the Greek goddess of wisdom | Who is Athena?
+This one-eyed giant appears in Greek myths | What is a Cyclops?
+This Egyptian god is shown with the head of a jackal | Who is Anubis?
+This Titan was said to hold up the sky | Who is Atlas?
+The famous oracle at Delphi served this Greek god | Who is Apollo?
+
+CATEGORY: Oceans
+This is the largest ocean | What is the Pacific Ocean?
+This ocean lies between the Americas and Europe and Africa | What is the Atlantic Ocean?
+This ocean lies south of Asia, between Africa and Australia | What is the Indian Ocean?
+This is the smallest ocean | What is the Arctic Ocean?
+This reef system off Australia is the largest in the world | What is the Great Barrier Reef?
+A giant wave often caused by an undersea earthquake is called this | What is a tsunami?
+The saltiness of ocean water is called this | What is salinity?
+Frozen seawater floating in polar waters is called this | What is sea ice?
+Tiny animals called coral polyps build these rocky structures | What are coral reefs?
+This current carries warm water from the Gulf of Mexico across the Atlantic | What is the Gulf Stream?
+New ocean floor forms along this underwater mountain chain | What is a mid-ocean ridge?
+This sunlit upper layer of the ocean is where photosynthesis can happen | What is the photic zone?
+This ocean surrounds Antarctica | What is the Southern Ocean?
+This trench in the Pacific is the deepest in the world | What is the Mariana Trench?
+These underwater forests of giant brown algae grow in cold coastal water | What are kelp forests?
+
+CATEGORY: Grammar
+This kind of word names a person, place, or thing | What is a noun?
+This kind of word shows an action or a state of being | What is a verb?
+A statement ends with this punctuation mark | What is a period?
+A word such as "she" or "they" that stands in for a noun is called this | What is a pronoun?
+This kind of word describes a noun | What is an adjective?
+A complete sentence has a subject and this | What is a predicate?
+This punctuation mark separates items in a list | What is a comma?
+"Quickly" and "softly" are this kind of word | What are adverbs?
+"And" and "but" are this kind of joining word | What is a conjunction?
+The words "a," "an," and "the" are called this | What are articles?
+The verb in "she walked" is in this tense | What is the past tense?
+A group of words with a subject and verb that can stand alone is called this | What is an independent clause?
+"The dog's bone" shows this case, which marks ownership | What is the possessive?
+"Running" in "Running is fun" is this verb form used as a noun | What is a gerund?
+The person or thing that receives the action of the verb is called this | What is the direct object?
+
+CATEGORY: World Capitals
+This is the capital of France | What is Paris?
+This is the capital of the United Kingdom | What is London?
+This is the capital of Japan | What is Tokyo?
+This is the capital of Italy | What is Rome?
+This is the capital of Mexico | What is Mexico City?
+This is the capital of China | What is Beijing?
+This is the capital of Canada | What is Ottawa?
+This is the capital of Egypt | What is Cairo?
+This is the capital of Spain | What is Madrid?
+This is the capital of Australia | What is Canberra?
+This is the capital of Greece | What is Athens?
+This is the capital of Brazil | What is Brasília?
+This is the capital of India | What is New Delhi?
+This is the capital of South Korea | What is Seoul?
+This is the capital of New Zealand | What is Wellington?
+
+CATEGORY: Plants
+These plant parts catch sunlight | What are leaves?
+These parts hold a plant in the ground and take in water | What are roots?
+This colorful part of many plants attracts bees and other pollinators | What is the flower?
+Plants take in this gas during photosynthesis | What is carbon dioxide?
+Giant pandas eat this tall woody grass | What is bamboo?
+Trees that drop their leaves in the fall are called this | What is deciduous?
+These plants stay green through the winter | What are evergreens?
+This powder from flowers can cause sneezing and allergies | What is pollen?
+Counting these rings can estimate a tree's age | What are annual rings?
+Photosynthesis takes place inside this green organelle | What is a chloroplast?
+The scientific study of plants is called this | What is botany?
+This green pigment captures light for photosynthesis | What is chlorophyll?
+These tubes carry water from the roots up through the plant | What is xylem?
+These tubes carry sugars from the leaves to the rest of the plant | What is phloem?
+A seed leaf is called this | What is a cotyledon?
+
+CATEGORY: Holidays
+This December holiday celebrates the birth of Jesus | What is Christmas?
+People wear costumes on this holiday that falls on October 31 | What is Halloween?
+This U.S. holiday celebrates independence on July 4 | What is Independence Day?
+This holiday honors mothers | What is Mother's Day?
+Many families eat turkey on this holiday of thanks | What is Thanksgiving?
+This holiday honors people who died while serving in the U.S. military | What is Memorial Day?
+This Jewish festival of lights lasts eight days | What is Hanukkah?
+This holiday on January 1 begins the new year | What is New Year's Day?
+Hearts and candy are common on this February 14 holiday | What is Valentine's Day?
+This holiday on March 17 is associated with Ireland and the color green | What is St. Patrick's Day?
+This January holiday honors the Rev. Dr. Martin Luther King Jr. | What is Martin Luther King Jr. Day?
+This holiday marks the end of Ramadan | What is Eid al-Fitr?
+This Jewish holiday includes a seder meal | What is Passover?
+This Mexican holiday honors loved ones who have died, with altars and marigolds | What is Día de los Muertos?
+Lamps and rangoli patterns are part of this Hindu festival of lights | What is Diwali?
+
+CATEGORY: Earth Science
+Hot melted rock under the ground is called this | What is magma?
+A sudden shaking of the ground is called this | What is an earthquake?
+Rock that forms when magma or lava cools is called this | What is igneous rock?
+This familiar scale uses numbers to rate an earthquake's magnitude | What is the Richter scale?
+This is Earth's thin, rocky outer layer | What is the crust?
+This instrument detects and records earthquakes | What is a seismograph?
+Rock formed from pressed layers of sand, mud, or shells is called this | What is sedimentary rock?
+Melted rock that flows on the surface is called this | What is lava?
+This supercontinent existed hundreds of millions of years ago | What is Pangaea?
+The San Andreas is a famous example of this crack in Earth's crust | What is a fault?
+Earth's core is made mostly of this metal | What is iron?
+Rock changed by heat and pressure is called this | What is metamorphic rock?
+Dinosaurs lived during this geologic era | What is the Mesozoic Era?
+This theory says Earth's outer shell is broken into moving plates | What is plate tectonics?
+Tectonic plates slide on this softer layer of the upper mantle | What is the asthenosphere?
+
+CATEGORY: Potpourri
+A leap year has this many days | What is 366?
+A baker's dozen is this many | What is 13?
+The English alphabet has this many letters | What is 26?
+Mixing blue and yellow makes this color | What is green?
+This is the first month of the year | What is January?
+An extra day is added to this month in a leap year | What is February?
+This board game uses letter tiles to spell words | What is Scrabble?
+There are this many Olympic rings | What is 5?
+This chess piece moves any number of squares straight, but not diagonally | What is a rook?
+This chess piece moves in an L shape | What is a knight?
+Schools often teach that Earth has this many continents | What is 7?
+This fairy-tale character loses a glass slipper | Who is Cinderella?
+This is the hardest natural substance | What is diamond?
+This Roman numeral stands for 50 | What is L?
+This is the only number that has the same number of letters as its value | What is four?
+`;
