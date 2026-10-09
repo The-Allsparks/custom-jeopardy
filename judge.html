@@ -179,31 +179,6 @@
       font-weight: 700;
     }
 
-    #finish {
-      width: min(40rem, 100%);
-      margin: 28px auto 0;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 204, 0, 0.35);
-      text-align: center;
-    }
-
-    #finish p {
-      margin: 0 0 10px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    #finish button {
-      min-height: 48px;
-      margin: 0 4px;
-      padding: 10px 14px;
-    }
-
-    #finish-yes {
-      background: var(--gold);
-      color: #111;
-    }
-
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -226,15 +201,6 @@
     <div id="actions"></div>
     <div id="scores"></div>
   </main>
-  <div id="finish" hidden>
-    <button id="finish-open" type="button">End game</button>
-    <div id="finish-confirm" hidden>
-      <p>Show final scores? Clues still on the board stay unplayed.</p>
-      <button id="finish-yes" type="button">End now</button>
-      <button id="finish-no" type="button">Keep playing</button>
-    </div>
-    <p id="finish-note" hidden>Final scores are on the board.</p>
-  </div>
   <script>
     (function () {
       const COLORS = [
@@ -265,19 +231,11 @@
       const sourceEl = document.getElementById("source");
       const actionsEl = document.getElementById("actions");
       const scoresEl = document.getElementById("scores");
-      const finishEl = document.getElementById("finish");
-      const finishOpen = document.getElementById("finish-open");
-      const finishConfirm = document.getElementById("finish-confirm");
-      const finishYes = document.getElementById("finish-yes");
-      const finishNo = document.getElementById("finish-no");
-      const finishNote = document.getElementById("finish-note");
       let socket = null;
       let state = { teams: [], names: {}, out: [], taken: [] };
       let receivedAt = 0;
       let clockTimer = null;
       let pending = false;
-      let ended = false;
-      let endedOn = "";
 
       function colorById(id) {
         for (let i = 0; i < COLORS.length; i++) {
@@ -466,16 +424,6 @@
         } else if (current && current.step === "question") {
           actionsEl.appendChild(actionButton("Back to board", { type: "action", action: "close" }));
         }
-        const clueId = current && current.id ? current.id : "";
-        if (ended && clueId && clueId !== endedOn) {
-          ended = false;
-        }
-        finishNote.hidden = !ended;
-        finishEl.hidden = false;
-        finishOpen.hidden = !finishConfirm.hidden;
-        finishOpen.disabled = pending;
-        finishYes.disabled = pending;
-        finishNo.disabled = pending;
         scoresEl.innerHTML = "";
         const amount = current ? Number(current.amount) : 0;
         const scoring = !!(buzzing && amount);
@@ -525,7 +473,6 @@
         socket = next;
         next.addEventListener("open", function () {
           statusEl.textContent = "Waiting for a clue";
-          finishEl.hidden = false;
         });
         next.addEventListener("message", function (event) {
           let data;
@@ -551,29 +498,6 @@
           setTimeout(connect, 1000);
         });
       }
-
-      finishOpen.addEventListener("click", function () {
-        finishOpen.hidden = true;
-        finishConfirm.hidden = false;
-        finishNote.hidden = true;
-        finishYes.focus();
-      });
-
-      finishNo.addEventListener("click", function () {
-        finishConfirm.hidden = true;
-        finishOpen.hidden = false;
-        finishNote.hidden = !ended;
-      });
-
-      finishYes.addEventListener("click", function () {
-        const current = clue();
-        ended = true;
-        endedOn = current && current.id ? current.id : "";
-        finishConfirm.hidden = true;
-        finishOpen.hidden = false;
-        finishNote.hidden = false;
-        sendAction({ type: "action", action: "finish" });
-      });
 
       if (!CODE.test(roomCode) || token.length < 16) {
         statusEl.textContent = "Open Judge window from the board menu.";

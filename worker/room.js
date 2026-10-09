@@ -2,7 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 
 const COLORS = ["red", "blue", "green", "yellow", "orange", "purple", "pink", "white"];
 const CODE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
-const JUDGE_ACTIONS = ["award", "reveal", "close", "dismiss", "reopen", "finish"];
+const JUDGE_ACTIONS = ["award", "reveal", "close", "dismiss", "reopen"];
 
 function emptyRoom() {
   return {

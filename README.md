@@ -1,30 +1,28 @@
 # Quizgrid
 
-A category board that runs in Chrome. The game page is `index.html`. The clues are in `board.txt`.
+A category board that runs in Chrome. The game page is `index.html`. The clues are in the `boards` folder.
 
-## Which copy to download
+## Which board to open
 
-| Branch | Board | Use it for |
+The page opens FTC BIOBUZZ. The arrows beside the title move to the next board. Copy the address bar to share the board that is open.
+
+| Board | Link | Use it for |
 | --- | --- | --- |
-| [`main`](https://github.com/The-Allsparks/quizgrid/tree/main) | Classroom Jeopardy | Science, history, and other school topics |
-| [`ftc-biobuzz`](https://github.com/The-Allsparks/quizgrid/tree/ftc-biobuzz) | FTC BIOBUZZ | 2026–2027 FIRST Tech Challenge review |
+| FTC BIOBUZZ | `index.html?board=ftc-biobuzz` | 2026–2027 FIRST Tech Challenge review |
+| Classroom | `index.html?board=classroom` | Science, history, and other school topics |
 
-Download the branch you want:
+Download one copy:
 
-- Classroom: https://github.com/The-Allsparks/quizgrid/archive/refs/heads/main.zip
-- BIOBUZZ: https://github.com/The-Allsparks/quizgrid/archive/refs/heads/ftc-biobuzz.zip
+https://github.com/The-Allsparks/quizgrid/archive/refs/heads/main.zip
 
-Unzip the folder. Open `index.html` in Chrome. Keep `index.html` and `board.txt` in the same folder. The page on GitHub will not run the game; it has to be opened from the downloaded folder.
+Unzip the folder. Open `index.html` in Chrome. Keep `index.html` and the `boards` folder together. The page on GitHub will not run the game; it has to be opened from the downloaded folder.
 
 If you use git:
 
 ```
 git clone https://github.com/The-Allsparks/quizgrid.git
 cd quizgrid
-git switch ftc-biobuzz
 ```
-
-Leave off the last line to stay on the classroom board.
 
 ## Play a game
 
@@ -39,7 +37,7 @@ On the answer screen, Escape puts that clue back on the board. Enter, Space, or 
 
 The menu's Judge window shows the response on your laptop while the projector stays on the board. The response is also printed in the console on a line that starts with `[Judge]`.
 
-Refreshing the page keeps the current game. Closing the tab and opening the page again deals a new board. Click the title and confirm to deal a new game now.
+Refreshing the page keeps the current game. Closing the tab and opening the page again deals a new board. Click the title and confirm to deal a new game now. The arrows switch boards and keep each board's game in this tab.
 
 ## Keep score
 
@@ -50,7 +48,7 @@ Open the menu at the top right. Credits introduces The Allsparks, FTC team 36117
 - Scores show in the header.
 - On a clue, **+** adds that clue's value and moves ahead one step. **−** subtracts that value and stays on the screen.
 
-Teams stay in this browser. A new deal sets every score back to zero and keeps the teams. The leader's score is outlined in gold.
+Teams stay with that board in this tab. A new deal sets every score back to zero and keeps the teams. The leader's score is outlined in gold.
 
 ## Host a room
 
@@ -70,7 +68,7 @@ Turn music off in the menu, or press M. The board still works if the music canno
 
 ## Edit the clues
 
-Open `board.txt` in a text editor. Leave the first line, `const BOARD =` followed by a backtick, and the last line, a backtick followed by a semicolon, as they are.
+Open the board's file in `boards` with a text editor. Leave the first line, `const BOARD =` followed by a backtick, and the last line, a backtick followed by a semicolon, as they are. To add a board, put a new file in `boards` and add one line to `boards/list.js`. The first line in that list is the board the page opens.
 
 ```
 TITLE: Your Game Name
@@ -89,10 +87,10 @@ Another answer | Another question
 - A dollar amount at the start of a line is ignored. `200 | answer | question` is read as `answer | question`. The board assigns the dollar values from where the clue sits in the list.
 - An optional source is shown on the question page and on each buzzer: `answer | question | citation | https://link`
 
-Save the file, then refresh Chrome. Changing `board.txt` starts a fresh deal.
+Save the file, then refresh Chrome. Changing a board file starts a fresh deal for that board.
 
 ## GitHub
 
 Repository: https://github.com/The-Allsparks/quizgrid
 
-`main` holds the game page and the classroom board. `ftc-biobuzz` is that same page plus the BIOBUZZ board. Edit `board.txt` on the branch you want to change, then push that branch.
+`main` holds the game page and every board. Edit the file in `boards` for the board you want to change, then push `main`.

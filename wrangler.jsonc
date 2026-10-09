@@ -1,7 +1,7 @@
 /**
  * Quizgrid board plus a room-coded buzzer.
- * Production branch is ftc-biobuzz.
- * Classroom clues stay on main and are not this Worker's production deploy.
+ * Boards live in boards/ and are chosen with ?board=.
+ * FTC BIOBUZZ is the default. Production deploys from main.
  */
 {
 	"name": "quizgrid",

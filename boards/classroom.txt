@@ -1,5 +1,5 @@
 // ============================================================
-// JEOPARDY BOARD — this is the file you edit
+// QUIZGRID BOARD — this is the file you edit
 // This is a .txt file so it can be emailed.
 // Leave the first "const BOARD =" line and the last `; line as they are.
 // ============================================================
@@ -22,8 +22,8 @@
 //     The dollar value is ignored. Order in the list is what matters.
 //
 // What the game deals each time:
-//   - Jeopardy gets 6 random categories
-//   - Double Jeopardy gets 6 different random categories
+//   - Round 1 gets 6 random categories
+//   - Round 2 gets 6 different random categories
 //   - Each column shows 5 clues
 //   - Those 5 are chosen one from each difficulty band:
 //       clues 1–3   → lowest dollar value
@@ -40,7 +40,7 @@
 // ============================================================
 
 const BOARD = `
-TITLE: Classroom Jeopardy
+TITLE: Classroom
 
 CATEGORY: Science
 This planet is closest to the Sun | What is Mercury?

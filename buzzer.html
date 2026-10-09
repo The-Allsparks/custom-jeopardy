@@ -7,7 +7,7 @@
   <link rel="icon" href="favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --gold: #ffcc00;
@@ -180,170 +180,10 @@
       text-align: center;
     }
 
-    #menu {
-      position: fixed;
-      top: max(12px, env(safe-area-inset-top));
-      right: max(12px, env(safe-area-inset-right));
-      z-index: 20;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-
-    #menu-toggle {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
-      align-items: center;
-      width: 44px;
-      height: 44px;
-      padding: 8px 0;
-      border: 2px solid var(--gold);
-      border-radius: 4px;
-      background: #111;
-      color: var(--gold);
-    }
-
-    #menu-toggle span {
-      display: block;
-      width: 5px;
-      height: 5px;
-      background: currentColor;
-      border-radius: 50%;
-    }
-
-    #menu-toggle:hover,
-    #menu-toggle:focus-visible,
-    #credits-open:hover,
-    #credits-open:focus-visible,
-    #credits-close:hover,
-    #credits-close:focus-visible,
-    #save-name:hover,
-    #save-name:focus-visible {
-      background: var(--gold);
-      color: #111;
-    }
-
-    #menu-panel {
-      width: min(18rem, calc(100vw - 24px));
-      margin-top: 8px;
-      padding: 8px;
-      background: #111;
-      border: 2px solid var(--gold);
-      border-radius: 4px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
-    }
-
-    #credits-open,
-    #credits-close,
-    #save-name {
-      width: 100%;
-      padding: 10px 14px;
-      border: 2px solid var(--gold);
-      border-radius: 4px;
-      background: #111;
-      color: var(--gold);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .menu-section {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 204, 0, 0.35);
-    }
-
-    #menu-name {
-      margin-bottom: 8px;
-      font-size: 1.15rem;
-      letter-spacing: 0.04em;
-      text-transform: none;
-    }
-
-    #name-note {
-      margin: 8px 0 0;
-      text-align: center;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
-
-    #credits {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(0, 0, 0, 0.72);
-    }
-
-    .credits-card {
-      width: min(28rem, 100%);
-      max-height: calc(100vh - 48px);
-      overflow: auto;
-      padding: 20px 22px 22px;
-      border: 2px solid var(--gold);
-      border-radius: 4px;
-      background: #111;
-    }
-
-    .credits-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-
-    #credits-title {
-      margin: 0;
-      color: var(--gold);
-      font-size: 1.4rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    #credits-close {
-      width: auto;
-      flex-shrink: 0;
-    }
-
-    .credits-card p {
-      margin: 0 0 10px;
-      font-family: "Source Serif 4", Georgia, serif;
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: 0;
-      line-height: 1.45;
-      text-transform: none;
-    }
-
-    .credits-card a {
-      color: var(--gold);
-    }
-
     [hidden] { display: none !important; }
   </style>
 </head>
 <body>
-  <div id="menu">
-    <button id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </button>
-    <div id="menu-panel" hidden>
-      <button id="credits-open" type="button">Credits</button>
-      <div class="menu-section">
-        <label for="menu-name">Team name</label>
-        <input id="menu-name" maxlength="16" autocomplete="nickname" placeholder="Optional" />
-        <button id="save-name" type="button">Save name</button>
-        <p id="name-note" hidden>Saved</p>
-      </div>
-    </div>
-  </div>
   <h1>Buzz</h1>
   <p id="room-name" hidden></p>
   <p id="status">Join a room</p>
@@ -362,17 +202,6 @@
     <button id="buzz" type="button" disabled>Wait</button>
   </div>
   <p id="error" hidden></p>
-  <div id="credits" hidden>
-    <div class="credits-card" role="dialog" aria-modal="true" aria-labelledby="credits-title">
-      <div class="credits-head">
-        <h2 id="credits-title">Credits</h2>
-        <button id="credits-close" type="button">Close</button>
-      </div>
-      <p>Made by <a href="https://www.theallsparks.org" target="_blank" rel="noopener noreferrer">The Allsparks</a>, FIRST Tech Challenge team 36117. <a href="https://www.theallsparks.org/support-us/donations" target="_blank" rel="noopener noreferrer">Donate</a> through Hack Club, a 501(c)(3).</p>
-      <p>Unofficial classroom board. Jeopardy! is a trademark of Jeopardy Productions, Inc.</p>
-      <p>Think music: <a href="https://archive.org/details/tvtunes_29826" target="_blank" rel="noopener noreferrer">Internet Archive</a>. <a href="https://github.com/The-Allsparks/quizgrid" target="_blank" rel="noopener noreferrer">Quizgrid on GitHub</a>.</p>
-    </div>
-  </div>
   <script>
     (function () {
       const COLORS = [
@@ -389,14 +218,6 @@
       const form = document.getElementById("join-form");
       const codeInput = document.getElementById("code");
       const nameInput = document.getElementById("team-name");
-      const menu = document.getElementById("menu");
-      const menuToggle = document.getElementById("menu-toggle");
-      const menuPanel = document.getElementById("menu-panel");
-      const menuName = document.getElementById("menu-name");
-      const nameNote = document.getElementById("name-note");
-      const credits = document.getElementById("credits");
-      const creditsOpen = document.getElementById("credits-open");
-      const creditsClose = document.getElementById("credits-close");
       const roomName = document.getElementById("room-name");
       const statusEl = document.getElementById("status");
       const sourceEl = document.getElementById("source");
@@ -453,7 +274,6 @@
         } catch (error) {
           nameInput.value = "";
         }
-        menuName.value = nameInput.value;
       }
 
       function remember(code, color, name) {
@@ -569,54 +389,6 @@
         }
       }
 
-      function openMenu() {
-        menuName.value = nameInput.value;
-        nameNote.hidden = true;
-        menu.classList.add("open");
-        menuPanel.hidden = false;
-        menuToggle.setAttribute("aria-expanded", "true");
-        menuToggle.setAttribute("aria-label", "Close menu");
-        menuName.focus();
-      }
-
-      function closeMenu() {
-        const restoreFocus = menuPanel.contains(document.activeElement);
-        menu.classList.remove("open");
-        menuPanel.hidden = true;
-        menuToggle.setAttribute("aria-expanded", "false");
-        menuToggle.setAttribute("aria-label", "Menu");
-        if (restoreFocus) {
-          menuToggle.focus();
-        }
-      }
-
-      function openCredits() {
-        closeMenu();
-        credits.hidden = false;
-        creditsClose.focus();
-      }
-
-      function closeCredits() {
-        credits.hidden = true;
-        menuToggle.focus();
-      }
-
-      function saveTeamName() {
-        const name = menuName.value.slice(0, 16);
-        menuName.value = name;
-        nameInput.value = name;
-        try {
-          sessionStorage.setItem("buzz-name", name);
-        } catch (error) {
-          // The name still applies for this page load.
-        }
-        if (state.you) {
-          remember(roomCode, state.you, name);
-          send({ type: "claim", color: state.you, name: name });
-        }
-        nameNote.hidden = false;
-      }
-
       function render() {
         const mine = state.you ? colorById(state.you) : null;
         const winner = state.winner ? colorById(state.winner) : null;
@@ -716,13 +488,7 @@
           receivedAt = Date.now();
           state = data;
           if (data.you) {
-            const named = data.names && data.names[data.you] ? data.names[data.you] : "";
-            const drafting = menu.classList.contains("open") || document.activeElement === nameInput;
-            if (!drafting) {
-              nameInput.value = named;
-              menuName.value = named;
-            }
-            remember(code, data.you, drafting ? nameInput.value : named);
+            remember(code, data.you, nameInput.value || savedName());
           }
           render();
           ensureClock();
@@ -752,64 +518,6 @@
       buzzBtn.addEventListener("click", function () {
         buzzBtn.disabled = true;
         send({ type: "buzz" });
-      });
-
-      menuToggle.addEventListener("click", function () {
-        if (menu.classList.contains("open")) {
-          closeMenu();
-          return;
-        }
-        openMenu();
-      });
-
-      nameInput.addEventListener("input", function () {
-        menuName.value = nameInput.value;
-        nameNote.hidden = true;
-      });
-
-      menuName.addEventListener("input", function () {
-        nameInput.value = menuName.value;
-        nameNote.hidden = true;
-      });
-
-      document.getElementById("save-name").addEventListener("click", saveTeamName);
-
-      menuName.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          saveTeamName();
-        }
-      });
-
-      creditsOpen.addEventListener("click", openCredits);
-      creditsClose.addEventListener("click", closeCredits);
-
-      credits.addEventListener("click", function (event) {
-        if (event.target === credits) {
-          closeCredits();
-        }
-      });
-
-      document.addEventListener("click", function (event) {
-        if (!menu.classList.contains("open") || menu.contains(event.target)) {
-          return;
-        }
-        closeMenu();
-      });
-
-      document.addEventListener("keydown", function (event) {
-        if (event.key !== "Escape") {
-          return;
-        }
-        if (!credits.hidden) {
-          event.preventDefault();
-          closeCredits();
-          return;
-        }
-        if (menu.classList.contains("open")) {
-          event.preventDefault();
-          closeMenu();
-        }
       });
 
       readCode();

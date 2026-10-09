@@ -91,6 +91,49 @@
       outline-offset: 4px;
     }
 
+    .board-nav {
+      appearance: none;
+      display: grid;
+      place-items: center;
+      width: 1.15em;
+      min-width: 44px;
+      height: 1em;
+      min-height: 44px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .board-nav span {
+      display: block;
+      width: 0.46em;
+      height: 0.46em;
+      border-left: 0.09em solid currentColor;
+      border-bottom: 0.09em solid currentColor;
+      transform: rotate(45deg);
+    }
+
+    #board-next span {
+      transform: rotate(-135deg);
+    }
+
+    .board-nav:hover,
+    .board-nav:focus-visible {
+      color: #fff;
+    }
+
+    .board-nav:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    .board-nav[hidden] {
+      display: none;
+    }
+
     #header-tools {
       display: flex;
       align-items: flex-end;
@@ -1019,7 +1062,11 @@
 </head>
 <body>
   <header>
-    <h1><button id="title" type="button" title="Deal a new game">Quizgrid</button></h1>
+    <h1>
+      <button id="board-prev" class="board-nav" type="button" aria-label="Previous board"><span></span></button>
+      <button id="title" type="button" title="Deal a new game">Quizgrid</button>
+      <button id="board-next" class="board-nav" type="button" aria-label="Next board"><span></span></button>
+    </h1>
     <div id="header-tools">
       <div id="score-bar" hidden></div>
       <div id="room" hidden>
@@ -1101,8 +1148,8 @@
       <h3>Repository</h3>
       <ul>
         <li><a href="https://github.com/The-Allsparks/quizgrid" target="_blank" rel="noopener noreferrer">Quizgrid on GitHub</a></li>
-        <li><a href="https://github.com/The-Allsparks/quizgrid/tree/main" target="_blank" rel="noopener noreferrer">main — Classroom Jeopardy</a></li>
-        <li><a href="https://github.com/The-Allsparks/quizgrid/tree/ftc-biobuzz" target="_blank" rel="noopener noreferrer">ftc-biobuzz — FTC BIOBUZZ</a></li>
+        <li><a href="?board=ftc-biobuzz">FTC BIOBUZZ</a></li>
+        <li><a href="?board=classroom">Classroom</a></li>
       </ul>
     </div>
   </div>
@@ -1127,7 +1174,35 @@
     <p id="moment-hint"></p>
   </div>
 
-  <script src="board.txt"></script>
+  <script src="boards/list.js"></script>
+  <script>
+    (function () {
+      var list = window.BOARD_LIST || [];
+      var params = new URLSearchParams(location.search);
+      var requested = params.get("board");
+      var chosen = list.length ? list[0] : null;
+      if (requested) {
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === requested) {
+            chosen = list[i];
+            break;
+          }
+        }
+      }
+      window.ACTIVE_BOARD = chosen;
+      if (chosen && params.get("board") !== chosen.id) {
+        params.set("board", chosen.id);
+        try {
+          history.replaceState(null, "", location.pathname + "?" + params.toString() + location.hash);
+        } catch (error) {
+          // The board still loads when the address bar cannot change.
+        }
+      }
+      if (chosen) {
+        document.write('<script src="' + chosen.file + '"><\/script>');
+      }
+    })();
+  </script>
   <script src="qrcode.js"></script>
   <script>
     (function () {
@@ -1159,7 +1234,7 @@
       const momentHint = document.getElementById("moment-hint");
 
       if (typeof BOARD !== "string") {
-        showError("Could not load board.txt. Keep index.html and board.txt in the same folder, then refresh.");
+        showError("Could not load this board. Keep index.html and the boards folder together, then refresh.");
         return;
       }
 
@@ -1251,6 +1326,46 @@
           return;
         }
         startNewGame();
+      });
+
+      const boardPrev = document.getElementById("board-prev");
+      const boardNext = document.getElementById("board-next");
+      const boardList = window.BOARD_LIST;
+      if (!Array.isArray(boardList) || boardList.length < 2) {
+        boardPrev.hidden = true;
+        boardNext.hidden = true;
+      }
+
+      function boardPageUrl(id) {
+        const params = new URLSearchParams(location.search);
+        params.set("board", id);
+        return location.pathname + "?" + params.toString() + location.hash;
+      }
+
+      function switchBoard(step) {
+        if (!Array.isArray(boardList) || boardList.length < 2) {
+          return;
+        }
+        const currentId = window.ACTIVE_BOARD && ACTIVE_BOARD.id;
+        let index = 0;
+        for (let i = 0; i < boardList.length; i++) {
+          if (boardList[i].id === currentId) {
+            index = i;
+            break;
+          }
+        }
+        const next = boardList[(index + step + boardList.length) % boardList.length];
+        if (roomCode && teams.length >= 2 && !window.confirm("Switch boards? The buzzer room will close, and players will need to join again.")) {
+          return;
+        }
+        location.assign(boardPageUrl(next.id));
+      }
+
+      boardPrev.addEventListener("click", function () {
+        switchBoard(-1);
+      });
+      boardNext.addEventListener("click", function () {
+        switchBoard(1);
       });
 
       menuToggle.addEventListener("click", function () {
@@ -1431,7 +1546,7 @@
           return null;
         }
         if (!categories.length) {
-          showError("No categories found in board.txt. Add at least one CATEGORY: line.");
+          showError("No categories found in this board. Add at least one CATEGORY: line.");
           return null;
         }
 
@@ -1618,6 +1733,11 @@
         });
       }
 
+      function boardStorageKey(name) {
+        const id = window.ACTIVE_BOARD && ACTIVE_BOARD.id ? ACTIVE_BOARD.id : "board";
+        return "jeopardy-" + name + ":" + id;
+      }
+
       function dealStorageKey() {
         return "jeopardy-deal:" + hashText(BOARD);
       }
@@ -1650,7 +1770,7 @@
       }
 
       function loadTeams() {
-        const saved = readSession("jeopardy-teams");
+        const saved = readSession(boardStorageKey("teams"));
         if (!Array.isArray(saved)) {
           return [];
         }
@@ -1669,7 +1789,7 @@
       }
 
       function saveTeams() {
-        writeSession("jeopardy-teams", teams);
+        writeSession(boardStorageKey("teams"), teams);
       }
 
       function addTeam(id) {
@@ -2763,8 +2883,8 @@
       }
 
       function ensureRoomCredentials() {
-        const savedCode = readSession("jeopardy-room-code");
-        const savedToken = readSession("jeopardy-room-token");
+        const savedCode = readSession(boardStorageKey("room-code"));
+        const savedToken = readSession(boardStorageKey("room-token"));
         roomCode = typeof savedCode === "string" ? savedCode : "";
         roomToken = typeof savedToken === "string" ? savedToken : "";
         if (!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/.test(roomCode)) {
@@ -2772,11 +2892,11 @@
           for (let i = 0; i < 4; i++) {
             roomCode += ROOM_ALPHABET[Math.floor(Math.random() * ROOM_ALPHABET.length)];
           }
-          writeSession("jeopardy-room-code", roomCode);
+          writeSession(boardStorageKey("room-code"), roomCode);
         }
         if (!roomToken) {
           roomToken = crypto.randomUUID();
-          writeSession("jeopardy-room-token", roomToken);
+          writeSession(boardStorageKey("room-token"), roomToken);
         }
       }
 
