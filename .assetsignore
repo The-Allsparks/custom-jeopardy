@@ -1,4 +1,5 @@
 **/.git
+**/.github
 **/*.mp3
 **/.DS_Store
 **/.wrangler
